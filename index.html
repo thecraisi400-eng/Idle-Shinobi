@@ -32,12 +32,29 @@
             width: 100%;
             height: 1px;
             background-color: #ffffff;
+            /* La divisoria siempre queda por encima del escenario dibujado. */
+            z-index: 2;
+        }
+
+        /*
+         * Lienzo del escenario: ocupa el cuadro superior del contenedor.
+         * Sus dimensiones reales (atributos width/height) se fijan desde JS
+         * con el tamaño exacto del recorte, para copiar píxel a píxel.
+         */
+        #lienzo-escenario {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            image-rendering: pixelated;
         }
     </style>
 </head>
 <body>
 
     <div class="contenedor-medida">
+        <!-- Aquí se dibuja solo el recorte exacto del escenario (cuadro superior). -->
+        <canvas id="lienzo-escenario" aria-label="Escenario de la zona 1"></canvas>
         <!-- La línea que divide horizontalmente a los 344px de alto -->
         <div class="linea-divisoria"></div>
     </div>
@@ -183,6 +200,94 @@
                         zonasPrecargadas: [...zonasPrecargadas]
                     });
                 }
+            });
+        })();
+
+        /*
+         * Escenario de la zona 1.
+         *
+         * NO se dibuja la imagen completa: se copia únicamente el rectángulo
+         * exacto de píxeles indicado en RECORTE_ESCENARIO, sin ningún escalado
+         * (1 px de la hoja = 1 px del lienzo). Ese rectángulo mide 392x344,
+         * igual que el cuadro superior del contenedor (392 px de ancho y la
+         * línea divisoria a los 344 px), así que encaja píxel a píxel.
+         */
+        (() => {
+            const NOMBRE_ESCENARIO = 'escenarios1';
+
+            // Coordenadas (en píxeles) donde está el escenario dentro de
+            // assets/sprites/escenarios1.webp. Ajuste solo estos cuatro valores
+            // si el recorte cambia de posición en la hoja.
+            const RECORTE_ESCENARIO = Object.freeze({
+                izquierda: 8,   // Inicio X (borde izquierdo del escenario)
+                arriba: 8,      // Inicio Y (borde superior del escenario)
+                derecha: 400,   // Fin X (borde derecho del escenario)
+                abajo: 352      // Fin Y (borde inferior del escenario)
+            });
+
+            const ANCHO = RECORTE_ESCENARIO.derecha - RECORTE_ESCENARIO.izquierda; // 392
+            const ALTO = RECORTE_ESCENARIO.abajo - RECORTE_ESCENARIO.arriba;       // 344
+
+            const lienzo = document.getElementById('lienzo-escenario');
+            // Tamaño físico del lienzo = tamaño del recorte: copia 1:1 sin escalado.
+            lienzo.width = ANCHO;
+            lienzo.height = ALTO;
+            lienzo.style.width = `${ANCHO}px`;
+            lienzo.style.height = `${ALTO}px`;
+
+            const ctx = lienzo.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+
+            function dibujarEscenario() {
+                const imagen = window.GestorSprites.obtener(NOMBRE_ESCENARIO);
+                if (!imagen) return;
+
+                // Aviso si la hoja fuera más pequeña de lo esperado: el navegador
+                // recortaría lo que falte y el resultado quedaría incompleto.
+                if (imagen.naturalWidth < RECORTE_ESCENARIO.derecha ||
+                    imagen.naturalHeight < RECORTE_ESCENARIO.abajo) {
+                    console.warn(
+                        `escenarios1.webp mide ${imagen.naturalWidth}x${imagen.naturalHeight} ` +
+                        `y el recorte necesita al menos ${RECORTE_ESCENARIO.derecha}x${RECORTE_ESCENARIO.abajo}.`
+                    );
+                }
+
+                ctx.clearRect(0, 0, ANCHO, ALTO);
+                // Rectángulo fuente (sx, sy, sw, sh) => solo esos píxeles exactos;
+                // rectángulo destino en (0, 0) con el mismo tamaño => sin escalar.
+                ctx.drawImage(
+                    imagen,
+                    RECORTE_ESCENARIO.izquierda, RECORTE_ESCENARIO.arriba, ANCHO, ALTO,
+                    0, 0, ANCHO, ALTO
+                );
+            }
+
+            // Redibuja en cuanto el gestor termina de cargar el escenario,
+            // o cuando la zona 1 queda lista.
+            window.addEventListener('sprites:cargado', (evento) => {
+                if (evento.detail.nombre === NOMBRE_ESCENARIO) dibujarEscenario();
+            });
+            window.addEventListener('sprites:zonaLista', (evento) => {
+                if (evento.detail.sprites.includes(NOMBRE_ESCENARIO)) dibujarEscenario();
+            });
+
+            // Verificación contra las medidas ya configuradas del juego: el
+            // recorte debe coincidir con el cuadro superior del contenedor.
+            const contenedor = document.querySelector('.contenedor-medida');
+            const divisoria = document.querySelector('.linea-divisoria');
+            if (contenedor && divisoria &&
+                (contenedor.clientWidth !== ANCHO || divisoria.offsetTop !== ALTO)) {
+                console.warn(
+                    `El recorte del escenario (${ANCHO}x${ALTO}) no coincide con el cuadro ` +
+                    `superior (${contenedor.clientWidth}x${divisoria.offsetTop}).`
+                );
+            }
+
+            // Activa la zona 1 para que el gestor cargue sus sprites. Si algún
+            // archivo de la zona faltara, el error se anota pero el escenario se
+            // dibuja igual en cuanto termina de cargar (evento sprites:cargado).
+            window.GestorSprites.entrarEnZona(1).catch((error) => {
+                console.warn(`Zona 1 incompleta: ${error.message}`);
             });
         })();
     </script>
