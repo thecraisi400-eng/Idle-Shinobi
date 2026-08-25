@@ -42,5 +42,149 @@
         <div class="linea-divisoria"></div>
     </div>
 
+    <script>
+        /*
+         * Gestor aislado de hojas de sprites.
+         *
+         * Coloque los diez archivos WebP en assets/sprites/. La asignación de cada
+         * personaje a una zona está reunida en ZONAS para que se pueda ajustar sin
+         * tocar el cargador ni la lógica del juego.
+         *
+         * Este bloque no inicia una carga por sí mismo, por lo que la pantalla actual
+         * conserva su comportamiento hasta que el juego invoque entrarEnZona().
+         */
+        (() => {
+            const RUTA_SPRITES = './assets/sprites/';
+
+            const SPRITES = {
+                escenarios1: `${RUTA_SPRITES}escenarios1.webp`,
+                escenarios2: `${RUTA_SPRITES}escenarios2.webp`,
+                escenarios3: `${RUTA_SPRITES}escenarios3.webp`,
+                personaje1: `${RUTA_SPRITES}personaje1.webp`,
+                personaje2: `${RUTA_SPRITES}personaje2.webp`,
+                personaje3: `${RUTA_SPRITES}personaje3.webp`,
+                personaje4: `${RUTA_SPRITES}personaje4.webp`,
+                personaje5: `${RUTA_SPRITES}personaje5.webp`,
+                personaje6: `${RUTA_SPRITES}personaje6.webp`,
+                personaje7: `${RUTA_SPRITES}personaje7.webp`
+            };
+
+            /*
+             * personaje1 se considera el personaje que acompaña al jugador durante
+             * toda la partida. Cambie solamente estos arreglos si la distribución
+             * real de enemigos o personajes por escenario es distinta.
+             */
+            const ZONAS = {
+                1: ['escenarios1', 'personaje1', 'personaje2', 'personaje3'],
+                2: ['escenarios2', 'personaje1', 'personaje4', 'personaje5'],
+                3: ['escenarios3', 'personaje1', 'personaje6', 'personaje7']
+            };
+            const SPRITES_PERSISTENTES = ['personaje1'];
+
+            const cargados = new Map();
+            const cargasEnCurso = new Map();
+            const zonasPrecargadas = new Set();
+            let zonaActiva = null;
+
+            function avisar(tipo, detalle) {
+                window.dispatchEvent(new CustomEvent(`sprites:${tipo}`, { detail: detalle }));
+            }
+
+            function cargarSprite(nombre) {
+                if (!SPRITES[nombre]) {
+                    return Promise.reject(new Error(`Sprite desconocido: ${nombre}`));
+                }
+                if (cargados.has(nombre)) return Promise.resolve(cargados.get(nombre));
+                if (cargasEnCurso.has(nombre)) return cargasEnCurso.get(nombre);
+
+                const carga = new Promise((resolver, rechazar) => {
+                    const imagen = new Image();
+                    imagen.decoding = 'async';
+                    imagen.onload = async () => {
+                        try {
+                            // decode() prepara la imagen antes de que el renderizador la use.
+                            if (imagen.decode) await imagen.decode();
+                            cargados.set(nombre, imagen);
+                            avisar('cargado', { nombre, imagen });
+                            resolver(imagen);
+                        } catch (error) {
+                            rechazar(error);
+                        } finally {
+                            cargasEnCurso.delete(nombre);
+                        }
+                    };
+                    imagen.onerror = () => {
+                        cargasEnCurso.delete(nombre);
+                        rechazar(new Error(`No se pudo cargar ${SPRITES[nombre]}`));
+                    };
+                    imagen.src = SPRITES[nombre];
+                });
+
+                cargasEnCurso.set(nombre, carga);
+                return carga;
+            }
+
+            async function cargarGrupo(nombres) {
+                return Promise.all(nombres.map(cargarSprite));
+            }
+
+            function liberarNoNecesarios() {
+                const conservar = new Set(SPRITES_PERSISTENTES);
+                if (zonaActiva !== null) ZONAS[zonaActiva].forEach(nombre => conservar.add(nombre));
+                zonasPrecargadas.forEach(zona => ZONAS[zona].forEach(nombre => conservar.add(nombre)));
+
+                cargados.forEach((imagen, nombre) => {
+                    if (!conservar.has(nombre)) {
+                        // Al eliminar la referencia, el navegador puede recuperar RAM y memoria gráfica.
+                        cargados.delete(nombre);
+                        avisar('liberado', { nombre });
+                    }
+                });
+            }
+
+            async function entrarEnZona(zona) {
+                if (!ZONAS[zona]) throw new Error(`Zona desconocida: ${zona}`);
+
+                // Primero se prepara la nueva zona. La anterior sigue visible si algo falla.
+                await cargarGrupo(ZONAS[zona]);
+                zonaActiva = zona;
+                zonasPrecargadas.delete(zona);
+                liberarNoNecesarios();
+                avisar('zonaLista', { zona, sprites: ZONAS[zona] });
+            }
+
+            async function precargarZona(zona) {
+                if (!ZONAS[zona]) throw new Error(`Zona desconocida: ${zona}`);
+                if (zona === zonaActiva) return;
+
+                await cargarGrupo(ZONAS[zona]);
+                // Solo se conserva una zona futura: así la precarga no crece sin límite.
+                zonasPrecargadas.clear();
+                zonasPrecargadas.add(zona);
+                liberarNoNecesarios();
+                avisar('zonaPrecargada', { zona, sprites: ZONAS[zona] });
+            }
+
+            function descartarPrecarga(zona) {
+                zonasPrecargadas.delete(zona);
+                liberarNoNecesarios();
+            }
+
+            window.GestorSprites = Object.freeze({
+                entrarEnZona,
+                precargarZona,
+                descartarPrecarga,
+                obtener(nombre) { return cargados.get(nombre) || null; },
+                estaCargado(nombre) { return cargados.has(nombre); },
+                estado() {
+                    return Object.freeze({
+                        zonaActiva,
+                        cargados: [...cargados.keys()],
+                        zonasPrecargadas: [...zonasPrecargadas]
+                    });
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
