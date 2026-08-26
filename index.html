@@ -23,6 +23,7 @@
             position: relative;
             /* Sombra sutil para diferenciarlo bien del fondo de la página */
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
         }
 
         .linea-divisoria {
@@ -33,6 +34,29 @@
             height: 1px;
             background-color: #ffffff;
         }
+
+        .estado-carga-sprites {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            left: 10px;
+            z-index: 2;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.72);
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            padding: 10px;
+            pointer-events: none;
+        }
+
+        .estado-carga-sprites strong {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 <body>
@@ -40,7 +64,113 @@
     <div class="contenedor-medida">
         <!-- La línea que divide horizontalmente a los 344px de alto -->
         <div class="linea-divisoria"></div>
+        <div class="estado-carga-sprites" id="estadoCargaSprites" aria-live="polite">
+            <strong>Cargando recursos gráficos...</strong>
+            Preparando escenarios y personajes.
+        </div>
     </div>
+
+    <script>
+        const SPRITE_SHEET_GROUPS = {
+            escenarios: [
+                { id: 'escenarios1', src: 'assets/sprites/escenarios1.webp', width: 2048, height: 2048 },
+                { id: 'escenarios2', src: 'assets/sprites/escenarios2.webp', width: 2048, height: 2048 }
+            ],
+            personajes: [
+                { id: 'personaje1', src: 'assets/sprites/personaje1.webp', width: 2048, height: 2048 },
+                { id: 'personaje2', src: 'assets/sprites/personaje2.webp', width: 2048, height: 2048 },
+                { id: 'personaje3', src: 'assets/sprites/personaje3.webp', width: 2048, height: 2048 }
+            ]
+        };
+
+        const spriteSheetManager = (() => {
+            const loadedSheets = new Map();
+            const loadingGroups = new Map();
+
+            const loadSheet = (sheet) => new Promise((resolve, reject) => {
+                if (loadedSheets.has(sheet.id)) {
+                    resolve(loadedSheets.get(sheet.id));
+                    return;
+                }
+
+                const image = new Image(sheet.width, sheet.height);
+                image.decoding = 'async';
+                image.loading = 'eager';
+
+                image.addEventListener('load', async () => {
+                    if (typeof image.decode === 'function') {
+                        try {
+                            await image.decode();
+                        } catch (error) {
+                            console.warn(`La hoja ${sheet.id} cargó, pero no pudo decodificarse de forma anticipada.`, error);
+                        }
+                    }
+
+                    const loadedSheet = { ...sheet, image };
+                    loadedSheets.set(sheet.id, loadedSheet);
+                    resolve(loadedSheet);
+                }, { once: true });
+
+                image.addEventListener('error', () => {
+                    reject(new Error(`No se pudo cargar la hoja de sprites: ${sheet.src}`));
+                }, { once: true });
+
+                image.src = sheet.src;
+            });
+
+            const loadGroup = (groupName) => {
+                if (!SPRITE_SHEET_GROUPS[groupName]) {
+                    return Promise.reject(new Error(`El grupo de sprites "${groupName}" no existe.`));
+                }
+
+                if (loadingGroups.has(groupName)) {
+                    return loadingGroups.get(groupName);
+                }
+
+                const groupLoad = Promise.all(SPRITE_SHEET_GROUPS[groupName].map(loadSheet))
+                    .finally(() => loadingGroups.delete(groupName));
+
+                loadingGroups.set(groupName, groupLoad);
+                return groupLoad;
+            };
+
+            const getSheet = (sheetId) => loadedSheets.get(sheetId) || null;
+            const hasSheet = (sheetId) => loadedSheets.has(sheetId);
+
+            return {
+                loadGroup,
+                getSheet,
+                hasSheet
+            };
+        })();
+
+        window.spriteSheetManager = spriteSheetManager;
+
+        const updateSpriteLoadStatus = (message, isError = false) => {
+            const statusElement = document.getElementById('estadoCargaSprites');
+            if (!statusElement) return;
+
+            statusElement.innerHTML = `<strong>${isError ? 'Error de carga' : 'Recursos gráficos'}</strong>${message}`;
+            statusElement.style.borderColor = isError ? '#ef4444' : 'rgba(255, 255, 255, 0.2)';
+        };
+
+        const prepareInitialSpriteSheets = async () => {
+            try {
+                updateSpriteLoadStatus('Cargando escenarios iniciales...');
+                await spriteSheetManager.loadGroup('escenarios');
+
+                updateSpriteLoadStatus('Escenarios listos. Preparando personajes y enemigos...');
+                await spriteSheetManager.loadGroup('personajes');
+
+                updateSpriteLoadStatus('Todas las hojas de sprites están listas para usarse.');
+            } catch (error) {
+                console.error(error);
+                updateSpriteLoadStatus('No se pudieron preparar todas las hojas. Revisa que los archivos .webp estén disponibles en assets/sprites/.', true);
+            }
+        };
+
+        prepareInitialSpriteSheets();
+    </script>
 
 </body>
 </html>
