@@ -6,6 +6,42 @@
     <title>Dimensiones Específicas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Gestión de carga de sprites: no modifica el contenedor ni sus dimensiones. */
+        #sprite-loading {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: grid;
+            place-items: center;
+            background: #111;
+            color: #fff;
+            font: 16px system-ui, sans-serif;
+        }
+
+        #sprite-loading[hidden] {
+            display: none;
+        }
+
+        #sprite-loading-content {
+            width: min(320px, calc(100vw - 40px));
+            text-align: center;
+        }
+
+        #sprite-loading-bar {
+            height: 6px;
+            margin-top: 14px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #333;
+        }
+
+        #sprite-loading-progress {
+            width: 0;
+            height: 100%;
+            background: #fff;
+            transition: width 120ms linear;
+        }
+
         body {
             /* Fondo gris oscuro para que el recuadro negro destaque */
             background-color: #333333; 
@@ -37,10 +73,117 @@
 </head>
 <body>
 
+    <div id="sprite-loading" role="status" aria-live="polite">
+        <div id="sprite-loading-content">
+            <div id="sprite-loading-label">Cargando recursos…</div>
+            <div id="sprite-loading-bar" aria-hidden="true">
+                <div id="sprite-loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="contenedor-medida">
         <!-- La línea que divide horizontalmente a los 344px de alto -->
         <div class="linea-divisoria"></div>
     </div>
+
+    <script>
+        // Administrador aislado: solo conoce las 10 hojas de sprites y no toca la lógica del juego.
+        (() => {
+            const root = 'assets/sprites/';
+            const initial = ['escenarios1.webp', 'personaje1.webp', 'personaje2.webp'];
+            const remaining = [
+                'escenarios2.webp', 'escenarios3.webp',
+                'personaje3.webp', 'personaje4.webp', 'personaje5.webp',
+                'personaje6.webp', 'personaje7.webp'
+            ];
+            const loaded = new Map();
+            const loading = new Map();
+            const label = document.getElementById('sprite-loading-label');
+            const progress = document.getElementById('sprite-loading-progress');
+            const screen = document.getElementById('sprite-loading');
+            let completed = 0;
+            const total = initial.length + remaining.length;
+
+            function updateProgress() {
+                completed += 1;
+                const percent = Math.round((completed / total) * 100);
+                progress.style.width = `${percent}%`;
+                label.textContent = `Cargando recursos… ${percent}%`;
+            }
+
+            function loadSheet(name) {
+                if (loaded.has(name)) return Promise.resolve(loaded.get(name));
+                if (loading.has(name)) return loading.get(name);
+
+                const task = fetch(root + name)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`No se pudo cargar ${name}`);
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        if ('createImageBitmap' in window) {
+                            return createImageBitmap(blob);
+                        }
+                        return new Promise((resolve, reject) => {
+                            const image = new Image();
+                            image.onload = () => resolve(image);
+                            image.onerror = () => reject(new Error(`No se pudo decodificar ${name}`));
+                            image.src = URL.createObjectURL(blob);
+                        });
+                    })
+                    .then(image => {
+                        loaded.set(name, image);
+                        loading.delete(name);
+                        updateProgress();
+                        return image;
+                    })
+                    .catch(error => {
+                        loading.delete(name);
+                        throw error;
+                    });
+
+                loading.set(name, task);
+                return task;
+            }
+
+            async function loadInOrder(list) {
+                for (const name of list) await loadSheet(name);
+            }
+
+            function idleLoad(list) {
+                const next = list.shift();
+                if (!next) return;
+                const run = () => loadSheet(next).catch(console.error).finally(() => idleLoad(list));
+                if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 1000 });
+                else setTimeout(run, 50);
+            }
+
+            // API pública mínima para el futuro renderizador: no reemplaza ninguna función existente.
+            window.spriteManager = {
+                get(name) { return loaded.get(name) || null; },
+                load(name) { return loadSheet(name); },
+                release(name) {
+                    const image = loaded.get(name);
+                    if (!image) return false;
+                    if (typeof image.close === 'function') image.close();
+                    loaded.delete(name);
+                    return true;
+                },
+                has(name) { return loaded.has(name); }
+            };
+
+            loadInOrder(initial)
+                .then(() => {
+                    screen.hidden = true;
+                    idleLoad(remaining.slice());
+                })
+                .catch(error => {
+                    label.textContent = 'No se pudieron cargar los recursos.';
+                    console.error(error);
+                });
+        })();
+    </script>
 
 </body>
 </html>
