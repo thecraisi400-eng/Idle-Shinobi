@@ -61,8 +61,21 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
         }
 
+        /* El lienzo mide exactamente el cuadro superior: 392 × 344 px. */
+        .escenario-superior {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            display: block;
+            width: 392px;
+            height: 344px;
+            image-rendering: pixelated;
+        }
+
         .linea-divisoria {
             position: absolute;
+            z-index: 1;
             top: 344px;
             left: 0;
             width: 100%;
@@ -83,6 +96,14 @@
     </div>
 
     <div class="contenedor-medida">
+        <!-- Recorte de escenarios1.webp: origen (11, 9), fin exclusivo (403, 353). -->
+        <canvas
+            id="escenario-superior"
+            class="escenario-superior"
+            width="392"
+            height="344"
+            aria-label="Escenario superior"
+        ></canvas>
         <!-- La línea que divide horizontalmente a los 344px de alto -->
         <div class="linea-divisoria"></div>
     </div>
@@ -159,6 +180,27 @@
                 else setTimeout(run, 50);
             }
 
+            function drawUpperScenario(image) {
+                // Coordenadas solicitadas de la hoja: [11, 403) × [9, 353).
+                // El extremo derecho e inferior son exclusivos, como drawImage(),
+                // por lo que el recorte conserva exactamente 392 × 344 píxeles.
+                const sourceX = 11;
+                const sourceY = 9;
+                const sourceWidth = 403 - sourceX;
+                const sourceHeight = 353 - sourceY;
+                const canvas = document.getElementById('escenario-superior');
+                const context = canvas.getContext('2d', { alpha: false });
+
+                if (!context) throw new Error('No se pudo preparar el escenario superior.');
+                context.imageSmoothingEnabled = false;
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(
+                    image,
+                    sourceX, sourceY, sourceWidth, sourceHeight,
+                    0, 0, canvas.width, canvas.height
+                );
+            }
+
             // API pública mínima para el futuro renderizador: no reemplaza ninguna función existente.
             window.spriteManager = {
                 get(name) { return loaded.get(name) || null; },
@@ -175,6 +217,8 @@
 
             loadInOrder(initial)
                 .then(() => {
+                    // Usa la instancia ya precargada: no crea ni muestra la hoja completa.
+                    drawUpperScenario(loaded.get('escenarios1.webp'));
                     screen.hidden = true;
                     idleLoad(remaining.slice());
                 })
