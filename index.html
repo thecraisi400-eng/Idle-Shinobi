@@ -179,18 +179,26 @@
                     width: 392,
                     height: 344
                 }
+            },
+            objetoSuperiorIzquierdo: {
+                sheetId: 'escenarios1',
+                source: {
+                    x: 422,
+                    y: 36,
+                    width: 618 - 422,
+                    height: 153 - 36
+                },
+                target: {
+                    canvasId: 'cuadroSuperiorSprite',
+                    x: 0,
+                    y: 0,
+                    width: 618 - 422,
+                    height: 153 - 36
+                }
             }
         };
 
-        const renderSpriteCrop = ({ sheetId, source, target }) => {
-            const loadedSheet = spriteSheetManager.getSheet(sheetId);
-            const canvas = document.getElementById(target.canvasId);
-
-            if (!loadedSheet || !canvas) return;
-
-            const context = canvas.getContext('2d');
-            context.imageSmoothingEnabled = false;
-            context.clearRect(0, 0, canvas.width, canvas.height);
+        const drawSpriteCrop = (context, loadedSheet, { source, target }) => {
             context.drawImage(
                 loadedSheet.image,
                 source.x,
@@ -202,6 +210,23 @@
                 target.width,
                 target.height
             );
+        };
+
+        const renderSpriteCrops = (sprites) => {
+            const canvas = document.getElementById(sprites[0]?.target.canvasId);
+
+            if (!canvas) return;
+
+            const context = canvas.getContext('2d');
+            context.imageSmoothingEnabled = false;
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            sprites.forEach((sprite) => {
+                const loadedSheet = spriteSheetManager.getSheet(sprite.sheetId);
+                if (!loadedSheet) return;
+
+                drawSpriteCrop(context, loadedSheet, sprite);
+            });
         };
 
         const updateSpriteLoadStatus = (message, isError = false) => {
@@ -216,7 +241,10 @@
             try {
                 updateSpriteLoadStatus('Cargando escenarios iniciales...');
                 await spriteSheetManager.loadGroup('escenarios');
-                renderSpriteCrop(SPRITES_VISIBLES.escenarioSuperior);
+                renderSpriteCrops([
+                    SPRITES_VISIBLES.escenarioSuperior,
+                    SPRITES_VISIBLES.objetoSuperiorIzquierdo
+                ]);
 
                 updateSpriteLoadStatus('Escenarios listos. Preparando personajes y enemigos...');
                 await spriteSheetManager.loadGroup('personajes');
