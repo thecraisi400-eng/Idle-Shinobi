@@ -163,6 +163,13 @@
 
         window.spriteSheetManager = spriteSheetManager;
 
+        const OBJETO_SUPERIOR_IZQUIERDO_SOURCE = {
+            x: 414,
+            y: 10,
+            width: 531 - 414 + 1,
+            height: 138 - 10 + 1
+        };
+
         const SPRITES_VISIBLES = {
             escenarioSuperior: {
                 sheetId: 'escenarios1',
@@ -182,18 +189,13 @@
             },
             objetoSuperiorIzquierdo: {
                 sheetId: 'escenarios1',
-                source: {
-                    x: 422,
-                    y: 36,
-                    width: 618 - 422,
-                    height: 153 - 36
-                },
+                source: OBJETO_SUPERIOR_IZQUIERDO_SOURCE,
                 target: {
                     canvasId: 'cuadroSuperiorSprite',
-                    x: 0,
-                    y: 0,
-                    width: 618 - 422,
-                    height: 153 - 36
+                    x: 8,
+                    y: 8,
+                    width: OBJETO_SUPERIOR_IZQUIERDO_SOURCE.width,
+                    height: OBJETO_SUPERIOR_IZQUIERDO_SOURCE.height
                 }
             }
         };
