@@ -1,0 +1,54 @@
+:root {
+  color-scheme: dark;
+  --color-bg: #08090d;
+  --color-surface: #151820;
+  --color-surface-strong: #1d212b;
+  --color-gold: #d6a93f;
+  --color-gold-light: #f6d77b;
+  --color-text: #f6f3ec;
+  --color-muted: #b8b4ac;
+  --color-danger: #d84a4a;
+  --font-scale: 1;
+  --touch-target: 48px;
+  --radius: 16px;
+  font-family: Inter, system-ui, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; background: radial-gradient(circle at 50% 0%, #2d2616, var(--color-bg) 46%); }
+button { font: inherit; }
+.app-shell { width: min(100%, 480px); min-height: 100dvh; margin: auto; padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom)); }
+.welcome-screen { min-height: calc(100dvh - 40px); display: grid; align-content: center; justify-items: stretch; gap: 16px; text-align: center; }
+.eyebrow { margin: 0; color: var(--color-gold-light); font-size: calc(.75rem * var(--font-scale)); font-weight: 800; letter-spacing: .13em; }
+h1, h2, p { overflow-wrap: anywhere; }
+h1 { margin: 0; font-size: clamp(2.8rem, 14vw, 4.4rem); line-height: .9; text-transform: uppercase; }
+h1 span, .brand span { color: var(--color-gold); }
+h2 { margin: 0; font-size: calc(1.35rem * var(--font-scale)); }
+.welcome-copy, .progress-label, .battle-card > p:not(.eyebrow) { color: var(--color-muted); font-size: calc(1rem * var(--font-scale)); line-height: 1.45; }
+.button { min-height: var(--touch-target); border-radius: 12px; border: 1px solid transparent; cursor: pointer; font-weight: 800; font-size: calc(1rem * var(--font-scale)); }
+.button--primary { color: #1d1506; background: linear-gradient(180deg, var(--color-gold-light), var(--color-gold)); box-shadow: 0 5px 0 #805c15; }
+.button--primary:disabled { cursor: not-allowed; opacity: .65; }
+.button--ghost { color: var(--color-gold-light); background: transparent; border-color: #6e5929; }
+.dashboard { display: grid; gap: 16px; min-height: calc(100dvh - 40px); grid-template-rows: auto auto auto 1fr auto; }
+.top-bar, .hero-summary, .currency-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { margin: 0; font-size: calc(.9rem * var(--font-scale)); font-weight: 900; letter-spacing: .06em; }
+.icon-button { min-width: var(--touch-target); min-height: var(--touch-target); border: 0; border-radius: 50%; color: var(--color-gold-light); background: var(--color-surface); font-size: 1.3rem; }
+.hero-summary, .battle-card, .currency-bar { border: 1px solid #393229; border-radius: var(--radius); background: linear-gradient(135deg, var(--color-surface-strong), var(--color-surface)); }
+.hero-summary { padding: 16px; align-items: flex-start; }
+.hero-portrait { display: grid; place-items: center; flex: 0 0 78px; aspect-ratio: 1; border: 2px solid var(--color-gold); border-radius: 50%; color: var(--color-gold-light); font-size: 2.4rem; background: #29200e; }
+.progress-track { width: 100%; height: 10px; border-radius: 99px; overflow: hidden; background: #07080c; }
+.progress-track span { display: block; height: 100%; background: linear-gradient(90deg, var(--color-gold), var(--color-gold-light)); }
+.progress-label { margin: 7px 0 0; font-size: calc(.78rem * var(--font-scale)); }
+.currency-bar { padding: 10px 14px; }
+.currency-bar p { margin: 0; font-size: calc(.88rem * var(--font-scale)); }
+.battle-card { display: grid; align-content: center; gap: 10px; padding: 22px; text-align: center; }
+.battle-card .button { margin-top: 6px; }
+.battle-card small { display: block; font-size: .67em; }
+.bottom-nav { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 7px 0 0; border-top: 1px solid #393229; }
+.nav-item { position: relative; display: grid; place-items: center; gap: 3px; min-height: 58px; border: 0; color: var(--color-muted); background: transparent; font-size: 1rem; }
+.nav-item span { font-size: clamp(.49rem, 2vw, .63rem); font-weight: 800; }
+.nav-item.is-active { color: var(--color-gold-light); }
+.nav-item.is-active::after { position: absolute; right: 12%; bottom: 0; left: 12%; height: 3px; border-radius: 99px; background: var(--color-gold); content: ""; }
+@media (prefers-reduced-motion: no-preference) { .button { transition: transform .15s ease, filter .15s ease; } .button:not(:disabled):active { transform: translateY(2px); } }
