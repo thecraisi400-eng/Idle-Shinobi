@@ -1,9 +1,7 @@
-export function renderDashboard(app, state) {
-  const template = document.querySelector("#dashboard-template");
-  app.replaceChildren(template.content.cloneNode(true));
-  app.querySelector("#player-level").textContent = state.player.level;
-  app.querySelector("#experience-value").textContent = state.player.experience;
-  app.querySelector("#experience-required").textContent = state.player.experienceRequired;
-  app.querySelector("#gold-value").textContent = state.currencies.gold;
-  app.querySelector("#gems-value").textContent = state.currencies.gems;
+import { SCREEN_RENDERERS } from "./screens.js";
+
+export function renderScreen(app, state, uiState) {
+  const render = SCREEN_RENDERERS[uiState.route] ?? SCREEN_RENDERERS.start;
+  app.innerHTML = `${render(state)}<div id="modal-root"></div><div id="toast-root" class="toast-root" aria-live="polite"></div>`;
+  requestAnimationFrame(() => app.querySelector("#screen-outlet, .start-screen, .combat-screen")?.focus?.());
 }
