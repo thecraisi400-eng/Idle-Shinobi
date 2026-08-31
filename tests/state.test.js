@@ -1,12 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createInitialState, isValidState, normalizeState, validateState } from "../src/game/state.js";
+import { APP_CONFIG } from "../src/config/app-config.js";
 
 test("el estado inicial es completo y válido", () => {
   const state = createInitialState({ now: "2026-08-31T00:00:00.000Z", saveId: "test-save" });
   assert.equal(isValidState(state), true);
   assert.equal(state.wallet.gold, 500);
-  assert.equal(state.meta.schemaVersion, 1);
+  assert.equal(state.meta.schemaVersion, APP_CONFIG.schemaVersion);
   assert.deepEqual(state.inventory.items, []);
 });
 

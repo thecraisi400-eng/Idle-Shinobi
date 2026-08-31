@@ -19,14 +19,15 @@ export function validateState(state) {
   if (!Number.isInteger(player.level) || player.level < 1 || player.level > PLAYER_CONFIG.maximumLevel) {
     errors.push(`player.level debe estar entre 1 y ${PLAYER_CONFIG.maximumLevel}.`);
   }
-  if (!isNonNegativeInteger(player.experience) || !isNonNegativeInteger(player.experienceRequired) || player.experienceRequired < 1) {
+  if (!isNonNegativeInteger(player.experience) || !isNonNegativeInteger(player.experienceRequired) || (player.level < PLAYER_CONFIG.maximumLevel && player.experienceRequired < 1)) {
     errors.push("La experiencia del jugador no es válida.");
   }
-  if (player.experience >= player.experienceRequired) errors.push("La experiencia debe ser menor que el requisito del nivel.");
+  if (player.level < PLAYER_CONFIG.maximumLevel && player.experience >= player.experienceRequired) errors.push("La experiencia debe ser menor que el requisito del nivel.");
   if (player.classId !== null && !PLAYER_CONFIG.classes.includes(player.classId)) errors.push("player.classId no es una clase permitida.");
-  if (!isRecord(player.stats) || Object.values(player.stats).some((value) => !isFiniteNonNegative(value))) {
+  if (!isRecord(player.baseStats) || Object.values(player.baseStats).some((value) => !isFiniteNonNegative(value))) {
     errors.push("Las estadísticas del jugador no son válidas.");
   }
+  if (!isRecord(player.training) || Object.values(player.training).some((value) => !isNonNegativeInteger(value))) errors.push("El entrenamiento del jugador no es válido.");
   for (const currency of ["gold", "gems"]) {
     if (!isNonNegativeInteger(wallet[currency])) errors.push(`wallet.${currency} debe ser un entero no negativo.`);
   }

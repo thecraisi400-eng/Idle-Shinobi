@@ -1,5 +1,6 @@
 export const ROUTES = Object.freeze({
   START: "start",
+  CLASS_SELECTION: "class-selection",
   HOME: "home",
   HERO: "hero",
   EQUIPMENT: "equipment",

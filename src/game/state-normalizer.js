@@ -17,7 +17,7 @@ function mergeKnown(defaultValue, candidate) {
 export function createInitialState({ now = new Date().toISOString(), saveId = "new-game" } = {}) {
   return {
     meta: { schemaVersion: APP_CONFIG.schemaVersion, createdAt: now, updatedAt: now, lastSavedAt: now, saveId, revision: 0 },
-    player: { name: "El Campeón del Pueblo", classId: null, level: 1, experience: 0, experienceRequired: PLAYER_CONFIG.initialExperienceRequired, statPoints: 0, stats: deepClone(PLAYER_CONFIG.initialStats) },
+    player: { name: "El Campeón del Pueblo", classId: null, level: 1, experience: 0, experienceRequired: PLAYER_CONFIG.initialExperienceRequired, statPoints: 0, baseStats: deepClone(PLAYER_CONFIG.initialStats), training: { health: 0, attack: 0, defense: 0, speed: 0, critical: 0 } },
     wallet: { gold: ECONOMY_CONFIG.initialGold, gems: ECONOMY_CONFIG.initialGems },
     campaign: { chapter: 1, wins: 0, currentEnemyId: "el-martillo" },
     inventory: { items: [] },

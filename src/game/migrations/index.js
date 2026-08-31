@@ -12,6 +12,7 @@ export function migrateState(state) {
     ...state,
     meta: { ...(state?.meta ?? {}), schemaVersion: APP_CONFIG.schemaVersion },
     wallet: state?.wallet ?? state?.currencies,
-    inventory: state?.inventory ?? { items: state?.equipment?.inventory ?? [] }
+    inventory: state?.inventory ?? { items: state?.equipment?.inventory ?? [] },
+    player: { ...state?.player, baseStats: state?.player?.baseStats ?? state?.player?.stats, training: state?.player?.training ?? { health: 0, attack: 0, defense: 0, speed: 0, critical: 0 } }
   };
 }
