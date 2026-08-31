@@ -6,7 +6,7 @@ const app = document.querySelector("#app");
 let state = loadGame() ?? createInitialState();
 
 function startGame() {
-  saveGame(state);
+  state = saveGame(state);
   renderDashboard(app, state);
 }
 

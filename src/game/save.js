@@ -1,25 +1,30 @@
-import { GAME_CONFIG } from "../config/game-config.js";
-import { isValidState } from "./state.js";
+import { createLocalStorageAdapter } from "../services/storage/local-storage-adapter.js";
+import { createSaveRepository } from "../services/storage/save-repository.js";
 
-function getStorage() {
-  return globalThis.localStorage;
+function repository() {
+  return createSaveRepository(createLocalStorageAdapter());
 }
 
 export function loadGame() {
   try {
-    const rawSave = getStorage()?.getItem(GAME_CONFIG.storageKey);
-    if (!rawSave) return null;
-    const state = JSON.parse(rawSave);
-    return isValidState(state) ? state : null;
+    return repository().load()?.state ?? null;
   } catch {
     return null;
   }
 }
 
 export function saveGame(state) {
-  if (!isValidState(state)) throw new TypeError("El estado del juego no es válido.");
-  const storage = getStorage();
-  const previousSave = storage?.getItem(GAME_CONFIG.storageKey);
-  if (previousSave) storage.setItem(GAME_CONFIG.backupStorageKey, previousSave);
-  storage?.setItem(GAME_CONFIG.storageKey, JSON.stringify(state));
+  return repository().save(state);
+}
+
+export function exportGame(state) {
+  return repository().exportState(state);
+}
+
+export function importGame(serialized) {
+  return repository().importState(serialized);
+}
+
+export function resetGame() {
+  repository().reset();
 }
