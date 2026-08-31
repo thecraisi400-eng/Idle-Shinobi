@@ -1,0 +1,10 @@
+{
+  "name": "ring-de-campeones",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "check": "find . -path './node_modules' -prune -o -name '*.js' -type f -exec node --check {} +"
+  }
+}

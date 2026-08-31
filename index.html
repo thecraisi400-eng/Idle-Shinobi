@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#08090d" />
+    <meta name="description" content="Ring de Campeones: tu camino hacia la gloria." />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Ring de Campeones</title>
+  </head>
+  <body>
+    <main id="app" class="app-shell" aria-live="polite">
+      <section class="welcome-screen" aria-labelledby="game-title">
+        <p class="eyebrow">LUCHA · GLORIA · LEYENDA</p>
+        <h1 id="game-title">Ring de <span>Campeones</span></h1>
+        <p class="welcome-copy">Forja a El Campeón del Pueblo y conquista cada ring.</p>
+        <button id="continue-button" class="button button--primary" type="button">Continuar</button>
+        <button id="settings-button" class="button button--ghost" type="button" aria-label="Abrir ajustes">Ajustes</button>
+      </section>
+    </main>
+    <template id="dashboard-template">
+      <section class="dashboard" aria-label="Panel principal">
+        <header class="top-bar">
+          <p class="brand">RING <span>DE CAMPEONES</span></p>
+          <button class="icon-button" type="button" aria-label="Abrir ajustes">⚙</button>
+        </header>
+        <section class="hero-summary" aria-labelledby="hero-name">
+          <div class="hero-portrait" aria-hidden="true">★</div>
+          <div>
+            <p class="eyebrow">NIVEL <span id="player-level">1</span></p>
+            <h2 id="hero-name">El Campeón del Pueblo</h2>
+            <div class="progress-track" aria-label="Experiencia"><span id="experience-progress" style="width: 0%"></span></div>
+            <p class="progress-label"><span id="experience-value">0</span> / <span id="experience-required">100</span> EXP</p>
+          </div>
+        </section>
+        <section class="currency-bar" aria-label="Recursos">
+          <p>🪙 <strong id="gold-value">500</strong> Oro</p>
+          <p>💎 <strong id="gems-value">0</strong> Gemas</p>
+        </section>
+        <section class="battle-card" aria-labelledby="battle-title">
+          <p class="eyebrow">PRÓXIMO COMBATE</p>
+          <h2 id="battle-title">El Martillo</h2>
+          <p>Recompensa: 50 Oro · 25 EXP</p>
+          <button class="button button--primary" type="button" disabled>¡Luchar! <small>Próximamente</small></button>
+        </section>
+        <nav class="bottom-nav" aria-label="Navegación principal">
+          <button class="nav-item is-active" type="button" aria-current="page">🦸<span>HÉROE</span></button>
+          <button class="nav-item" type="button">🛡️<span>EQUIPO</span></button>
+          <button class="nav-item" type="button">🌳<span>HABILIDAD</span></button>
+          <button class="nav-item" type="button">📅<span>EVENTOS</span></button>
+          <button class="nav-item" type="button">🥊<span>PVP</span></button>
+          <button class="nav-item" type="button">🛒<span>TIENDA</span></button>
+        </nav>
+      </section>
+    </template>
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
