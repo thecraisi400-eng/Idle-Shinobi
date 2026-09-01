@@ -1,0 +1,33 @@
+{
+  "name": "ring-de-campeones",
+  "version": "0.2.0",
+  "description": "Ring de Campeones — juego de lucha libre y progreso, PWA vertical jugable sin conexión.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "lint": "eslint .",
+    "check": "npm run test && npm run build && npm run test:e2e"
+  },
+  "keywords": [
+    "pwa",
+    "juego",
+    "lucha-libre",
+    "idle"
+  ],
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.62.1",
+    "eslint": "10.9.1",
+    "globals": "17.11.0",
+    "jsdom": "30.0.1",
+    "vite": "8.2.2",
+    "vitest": "4.1.11"
+  }
+}
