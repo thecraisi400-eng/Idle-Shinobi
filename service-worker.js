@@ -8,7 +8,7 @@
  *  - Al activar una versión nueva se borran las cachés anteriores.
  */
 
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v1.4.0';
 const CACHE_NAME = `ring-de-campeones-${CACHE_VERSION}`;
 
 /** Archivos estáticos mínimos para arrancar sin conexión. */

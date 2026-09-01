@@ -1,50 +1,62 @@
 /**
- * Ring de Campeones — Rutas y navegación (Paso 2)
+ * Ring de Campeones — Enrutador en memoria con espejo en el hash.
  *
- * Flujo: PORTADA → (clase → tutorial) → PANEL → pestañas.
- * Las pantallas inmersivas (combate, evento) ocultan cabecera y navegación.
+ * Flujo del Paso 4:
+ * PORTADA → CLASE → TUTORIAL → PANEL → secciones → PRECOMBATE → COMBATE → RESULTADO.
  */
 
 export const ROUTES = Object.freeze({
   HOME: 'home',
+  CLASS_SELECT: 'class-select',
+  TUTORIAL: 'tutorial',
   DASHBOARD: 'dashboard',
   HERO: 'hero',
   EQUIPMENT: 'equipment',
   SKILLS: 'skills',
   EVENTS: 'events',
+  EVENT_PLAY: 'event-play',
   PVP: 'pvp',
   SHOP: 'shop',
+  MISSIONS: 'missions',
+  ACHIEVEMENTS: 'achievements',
+  INBOX: 'inbox',
   SETTINGS: 'settings',
-  COMBAT: 'combat'
+  PRECOMBAT: 'precombat',
+  COMBAT: 'combat',
+  RESULT: 'result'
 });
 
 /** Rutas que ocupan toda la pantalla sin cabecera ni navegación inferior. */
-export const IMMERSIVE_ROUTES = Object.freeze([ROUTES.HOME, ROUTES.COMBAT]);
+export const IMMERSIVE_ROUTES = Object.freeze([
+  ROUTES.HOME,
+  ROUTES.CLASS_SELECT,
+  ROUTES.TUTORIAL,
+  ROUTES.SETTINGS,
+  ROUTES.PRECOMBAT,
+  ROUTES.COMBAT,
+  ROUTES.EVENT_PLAY,
+  ROUTES.RESULT
+]);
 
-/** Pestañas de la navegación inferior, en orden. */
+/** Las seis secciones pedidas; el panel se abre tocando el nivel de la cabecera. */
 export const NAV_TABS = Object.freeze([
-  { route: ROUTES.DASHBOARD, label: 'Panel', icon: '🏟️' },
   { route: ROUTES.HERO, label: 'Héroe', icon: '🥊' },
   { route: ROUTES.EQUIPMENT, label: 'Equipo', icon: '🛡️' },
   { route: ROUTES.SKILLS, label: 'Habilidad', icon: '✨' },
   { route: ROUTES.EVENTS, label: 'Eventos', icon: '📅' },
-  { route: ROUTES.PVP, label: 'PVP', icon: '🏆' }
+  { route: ROUTES.PVP, label: 'PVP', icon: '🏆' },
+  { route: ROUTES.SHOP, label: 'Tienda', icon: '🛒' }
 ]);
+
+export const ACTIVE_MODE_ROUTES = Object.freeze([ROUTES.COMBAT, ROUTES.EVENT_PLAY]);
+export const ONBOARDING_ROUTES = Object.freeze([ROUTES.CLASS_SELECT, ROUTES.TUTORIAL]);
 
 const VALID_ROUTES = new Set(Object.values(ROUTES));
 
-/**
- * Enrutador en memoria con espejo en el hash de la URL.
- * @param {Object} [options]
- * @param {string} [options.initialRoute]
- * @param {Window} [options.win]
- */
 export function createRouter({ initialRoute = ROUTES.HOME, win = window } = {}) {
   let current = isValidRoute(initialRoute) ? initialRoute : ROUTES.HOME;
-  /** @type {string[]} Pila de retroceso dentro de la aplicación. */
   const stack = [];
   const listeners = new Set();
-  /** @type {(() => boolean)[]} Interceptores del botón Atrás (modales, combate). */
   const backGuards = [];
 
   function isValidRoute(route) {
@@ -55,10 +67,6 @@ export function createRouter({ initialRoute = ROUTES.HOME, win = window } = {}) 
     for (const listener of listeners) listener(current, previous);
   }
 
-  /**
-   * Refleja la ruta en el hash. `push` crea una entrada de historial para que
-   * el botón Atrás del teléfono retroceda dentro del juego en vez de salir.
-   */
   function syncHash({ push = false } = {}) {
     if (!win?.location || !win?.history) return;
     const hash = `#/${current}`;
@@ -74,14 +82,10 @@ export function createRouter({ initialRoute = ROUTES.HOME, win = window } = {}) 
     get current() {
       return current;
     },
-
     get depth() {
       return stack.length;
     },
-
     isValidRoute,
-
-    /** Navega a una ruta; `replace` evita apilar retroceso. */
     go(route, { replace = false } = {}) {
       if (!isValidRoute(route)) {
         console.warn(`Ruta desconocida: ${route}`);
@@ -96,11 +100,9 @@ export function createRouter({ initialRoute = ROUTES.HOME, win = window } = {}) 
       notify(previous);
       return true;
     },
-
-    /** Vuelve atrás. Devuelve false si ya no hay a dónde volver. */
     back() {
       for (let i = backGuards.length - 1; i >= 0; i -= 1) {
-        if (backGuards[i]() === true) return true; // consumido (modal, combate…)
+        if (backGuards[i]() === true) return true;
       }
       if (stack.length === 0) return false;
 
@@ -110,8 +112,6 @@ export function createRouter({ initialRoute = ROUTES.HOME, win = window } = {}) 
       notify(previous);
       return true;
     },
-
-    /** Registra un interceptor del botón Atrás. Devuelve la función de baja. */
     addBackGuard(guard) {
       backGuards.push(guard);
       return () => {
@@ -119,24 +119,17 @@ export function createRouter({ initialRoute = ROUTES.HOME, win = window } = {}) 
         if (index >= 0) backGuards.splice(index, 1);
       };
     },
-
-    /** Suscribe un oyente a los cambios de ruta. Devuelve la función de baja. */
     subscribe(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
-
-    /** Vacía la pila de retroceso (por ejemplo al entrar al panel). */
     resetStack() {
       stack.length = 0;
     },
-
-    /** Aplica la ruta escrita en el hash, si es válida. */
     readHash() {
       const raw = String(win?.location?.hash || '').replace(/^#\/?/, '');
       return isValidRoute(raw) ? raw : null;
     },
-
     syncHash
   };
 }

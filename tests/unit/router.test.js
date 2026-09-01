@@ -103,11 +103,23 @@ describe('router', () => {
     expect(createRouter({ win: fakeWindow('#/pirata') }).readHash()).toBeNull();
   });
 
-  it('define exactamente seis pestañas y rutas inmersivas', () => {
-    expect(NAV_TABS).toHaveLength(6);
+  it('define las seis secciones correctas y los modos inmersivos', () => {
+    expect(NAV_TABS.map((tab) => tab.route)).toEqual([
+      ROUTES.HERO,
+      ROUTES.EQUIPMENT,
+      ROUTES.SKILLS,
+      ROUTES.EVENTS,
+      ROUTES.PVP,
+      ROUTES.SHOP
+    ]);
     expect(new Set(NAV_TABS.map((tab) => tab.route)).size).toBe(6);
-    for (const tab of NAV_TABS) expect(Object.values(ROUTES)).toContain(tab.route);
-    expect(IMMERSIVE_ROUTES).toContain(ROUTES.HOME);
-    expect(IMMERSIVE_ROUTES).toContain(ROUTES.COMBAT);
+    expect(IMMERSIVE_ROUTES).toEqual(expect.arrayContaining([
+      ROUTES.HOME,
+      ROUTES.CLASS_SELECT,
+      ROUTES.TUTORIAL,
+      ROUTES.COMBAT,
+      ROUTES.EVENT_PLAY,
+      ROUTES.RESULT
+    ]));
   });
 });

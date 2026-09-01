@@ -27,6 +27,20 @@ describe('store de juego', () => {
     expect(loadGameState({ storage }).state.settings.quality).toBe('low');
   });
 
+  it('selecciona una clase jugable permanente y completa el tutorial en orden', () => {
+    const store = createGameStore({ storage: memoryStorage(), autosave: false });
+
+    expect(() => store.dispatch({ type: 'profile/completeTutorial' })).toThrow(/clase/);
+    expect(() => store.dispatch({ type: 'profile/selectClass', classId: 'legend' })).toThrow(/jugable/);
+
+    store.dispatch({ type: 'profile/selectClass', classId: 'agile' });
+    expect(store.getState().profile.classId).toBe('agile');
+    expect(() => store.dispatch({ type: 'profile/selectClass', classId: 'heavy' })).toThrow(/permanente/);
+
+    store.dispatch({ type: 'profile/completeTutorial' });
+    expect(store.getState().profile.tutorialDone).toBe(true);
+  });
+
   it('aplica gastos de recursos de forma atómica', () => {
     const storage = memoryStorage();
     const initial = createInitialState(1);

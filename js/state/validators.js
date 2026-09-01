@@ -7,6 +7,7 @@
  */
 
 import { GAME_CONFIG } from '../config/game-config.js';
+import { CLASSES } from '../config/classes.js';
 import {
   EQUIPMENT_SLOTS,
   QUALITY_OPTIONS,
@@ -71,6 +72,7 @@ const VALID_RESOURCES = new Set(RESOURCE_KEYS);
 const VALID_TEXT_SIZES = new Set(TEXT_SIZE_OPTIONS);
 const VALID_QUALITIES = new Set(QUALITY_OPTIONS);
 const VALID_SLOTS = new Set(EQUIPMENT_SLOTS);
+const VALID_PLAYER_CLASSES = new Set(Object.values(CLASSES).filter((entry) => entry.isPlayable).map((entry) => entry.id));
 const MAX_SAFE_AMOUNT = Number.MAX_SAFE_INTEGER;
 
 export class StateValidationError extends Error {
@@ -174,6 +176,9 @@ function validateProfile(profile, errors) {
   expectNonNegativeInteger(profile.createdAt, '$.profile.createdAt', errors);
   expectString(profile.heroName, '$.profile.heroName', errors, { min: 1, max: 40 });
   expectNullableId(profile.classId, '$.profile.classId', errors);
+  if (profile.classId !== null && !VALID_PLAYER_CLASSES.has(profile.classId)) {
+    errors.push('$.profile.classId no es una clase jugable');
+  }
   expectBoolean(profile.tutorialDone, '$.profile.tutorialDone', errors);
 }
 

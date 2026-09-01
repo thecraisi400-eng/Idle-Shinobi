@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../js/app.js';
 import { NAV_TABS, ROUTES } from '../../js/ui/router.js';
 
-/** Prepara el DOM mínimo de index.html. */
 function setupDom() {
   document.body.replaceChildren();
   const app = document.createElement('div');
@@ -29,10 +28,23 @@ async function boot(storage = memoryStorage()) {
   const root = setupDom();
   const app = await createApp(root, { win: window, storage });
   await app.start();
-  return { root, app };
+  return { root, app, storage };
 }
 
-describe('armazón de la aplicación', () => {
+async function completeOnboarding(root, classId = 'balanced') {
+  root.querySelector('[data-testid="btn-new-game"]').click();
+  await Promise.resolve();
+  root.querySelector(`[data-testid="class-${classId}"]`).click();
+  root.querySelector('[data-testid="btn-confirm-class"]').click();
+  await Promise.resolve();
+  for (let index = 0; index < 3; index += 1) {
+    root.querySelector('[data-testid="tutorial-next"]').click();
+  }
+  root.querySelector('[data-testid="tutorial-finish"]').click();
+  await Promise.resolve();
+}
+
+describe('interfaz y navegación del Paso 4', () => {
   beforeEach(() => {
     window.location.hash = '';
   });
@@ -58,27 +70,51 @@ describe('armazón de la aplicación', () => {
     expect(root.querySelector('[data-testid="home-save-info"]').textContent).toContain('12');
   });
 
-  it('entra al panel con Nueva partida y muestra cabecera y navegación', async () => {
+  it('crea partida, elige clase, completa tutorial y entra al panel', async () => {
     const { root, app } = await boot();
     root.querySelector('[data-testid="btn-new-game"]').click();
     await Promise.resolve();
+    expect(app.router.current).toBe(ROUTES.CLASS_SELECT);
+    expect(root.querySelectorAll('.class-option')).toHaveLength(4);
+
+    root.querySelector('[data-testid="class-technical"]').click();
+    root.querySelector('[data-testid="btn-confirm-class"]').click();
+    await Promise.resolve();
+    expect(app.router.current).toBe(ROUTES.TUTORIAL);
+    expect(app.store.getState().profile.classId).toBe('technical');
+
+    for (let index = 0; index < 3; index += 1) root.querySelector('[data-testid="tutorial-next"]').click();
+    root.querySelector('[data-testid="tutorial-finish"]').click();
+    await Promise.resolve();
 
     expect(app.router.current).toBe(ROUTES.DASHBOARD);
-    expect(root.querySelector('[data-testid="screen-dashboard"]')).not.toBeNull();
+    expect(app.store.getState().profile.tutorialDone).toBe(true);
     expect(root.querySelector('[data-testid="resource-bar"]')).not.toBeNull();
     expect(root.querySelectorAll('.nav-tab')).toHaveLength(6);
   });
 
-  it('recorre las seis pestañas y marca la activa', async () => {
+  it('recorre las seis pestañas, incluida Tienda, y marca la activa', async () => {
     const { root, app } = await boot();
-    root.querySelector('[data-testid="btn-new-game"]').click();
-    await Promise.resolve();
+    await completeOnboarding(root);
 
+    expect(NAV_TABS.map((tab) => tab.route)).toEqual(['hero', 'equipment', 'skills', 'events', 'pvp', 'shop']);
     for (const tab of NAV_TABS) {
       root.querySelector(`[data-testid="nav-${tab.route}"]`).click();
       expect(app.router.current).toBe(tab.route);
       expect(root.querySelector(`[data-testid="screen-${tab.route}"]`)).not.toBeNull();
       expect(root.querySelector(`[data-testid="nav-${tab.route}"]`).getAttribute('aria-current')).toBe('page');
+    }
+  });
+
+  it('abre los accesos secundarios desde el panel', async () => {
+    const { root, app } = await boot();
+    await completeOnboarding(root);
+
+    for (const route of ['missions', 'achievements', 'inbox']) {
+      root.querySelector(`[data-testid="quick-${route}"]`).click();
+      expect(app.router.current).toBe(route);
+      expect(root.querySelector(`[data-testid="screen-${route}"]`)).not.toBeNull();
+      root.querySelector('[data-action="go-dashboard"]').click();
     }
   });
 
@@ -96,10 +132,9 @@ describe('armazón de la aplicación', () => {
     expect(JSON.parse(storage.getItem('ringDeCampeones.preferences')).fontScale).toBe('large');
   });
 
-  it('el botón Volver regresa a la pantalla anterior', async () => {
+  it('el botón Volver de Ajustes regresa a la pantalla anterior', async () => {
     const { root, app } = await boot();
-    root.querySelector('[data-testid="btn-new-game"]').click();
-    await Promise.resolve();
+    await completeOnboarding(root);
     root.querySelector('[data-testid="btn-settings"]').click();
     await Promise.resolve();
     expect(app.router.current).toBe(ROUTES.SETTINGS);
@@ -109,7 +144,25 @@ describe('armazón de la aplicación', () => {
     expect(app.router.current).toBe(ROUTES.DASHBOARD);
   });
 
-  it('todos los botones declaran un objetivo táctil y una etiqueta', async () => {
+  it('recorre precombate, combate y resultado sin aplicar recompensas', async () => {
+    const { root, app } = await boot();
+    await completeOnboarding(root);
+    const resourcesBefore = app.store.getState().resources;
+
+    root.querySelector('[data-testid="btn-fight"]').click();
+    expect(app.router.current).toBe(ROUTES.PRECOMBAT);
+    root.querySelector('[data-testid="btn-start-combat"]').click();
+    expect(app.router.current).toBe(ROUTES.COMBAT);
+    expect(root.querySelector('[data-testid="resource-bar"]')).toBeNull();
+    root.querySelector('[data-testid="btn-resolve-combat"]').click();
+    expect(app.router.current).toBe(ROUTES.RESULT);
+    root.querySelector('[data-testid="btn-result-dashboard"]').click();
+
+    expect(app.router.current).toBe(ROUTES.DASHBOARD);
+    expect(app.store.getState().resources).toEqual(resourcesBefore);
+  });
+
+  it('todos los botones declaran tipo y una etiqueta', async () => {
     const { root } = await boot();
     root.querySelector('[data-testid="btn-new-game"]').click();
     await Promise.resolve();
@@ -121,7 +174,7 @@ describe('armazón de la aplicación', () => {
     }
   });
 
-  it('destroy limpia el contenedor', async () => {
+  it('destroy limpia el contenedor y los temporizadores', async () => {
     const { root, app } = await boot();
     app.destroy();
     expect(root.childElementCount).toBe(0);
