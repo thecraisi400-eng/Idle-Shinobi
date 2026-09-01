@@ -64,7 +64,7 @@ export function renderHomeScreen({ hasSave = false, savedLevel = 0, version = '0
       el('p', { className: 'home__subtitle', text: 'Sube al ring, gana títulos y hazte leyenda.' }),
       saveLine,
       actions,
-      el('p', { className: 'home__version', text: `Versión ${version} — Paso 2` })
+      el('p', { className: 'home__version', text: `Versión ${version} — Paso 3` })
     ]
   });
 }
