@@ -1,12 +1,12 @@
 /**
- * Ring de Campeones — Coordinación general de la aplicación (Paso 2)
+ * Ring de Campeones — Coordinación general de la aplicación (Paso 3)
  *
- * Responsabilidad: montar el armazón (cabecera, pantalla, navegación),
- * conectar el enrutador y delegar los eventos táctiles. Todavía no hay
- * sistemas de juego: las pantallas son temporales y se completan más adelante.
+ * Monta el armazón, conecta el enrutador y usa el store central como única
+ * fuente de verdad para progreso, recursos, ajustes y guardado seguro.
  */
 
-import { GAME_CONFIG } from './config/game-config.js';
+import { createGameStore } from './state/store.js';
+import { getInstallationId, getSavedGameSummary, loadGameState } from './state/persistence.js';
 import { el, clear, mount } from './ui/render.js';
 import { createRouter, ROUTES, IMMERSIVE_ROUTES, NAV_TABS } from './ui/router.js';
 import { renderResourceBar } from './ui/components/resource-bar.js';
@@ -18,7 +18,7 @@ import { renderSettingsScreen } from './ui/screens/settings.js';
 import { renderPlaceholderScreen } from './ui/screens/placeholder-screens.js';
 import { applyPreferences, loadPreferences, savePreferences } from './platform/preferences.js';
 
-export const APP_VERSION = '0.2.0';
+export const APP_VERSION = '0.3.0';
 
 /**
  * Construye la aplicación sobre un contenedor.
@@ -32,17 +32,13 @@ export async function createApp(root, { win = window, storage = safeStorage(win)
   if (!root) throw new Error('No se encontró el contenedor de la aplicación.');
 
   const router = createRouter({ win });
+  const initialLoad = loadGameState({ storage });
+  const store = createGameStore({ initialState: initialLoad.state, storage });
   let preferences = applyPreferences(loadPreferences(storage), win.document);
+  let saveSummary = getSavedGameSummary(storage);
 
-  /** Datos provisionales de cabecera hasta que exista el estado (Paso 3). */
-  const session = {
-    level: 1,
-    gold: 0,
-    gems: 0,
-    materials: 0,
-    hasSave: detectSave(storage),
-    savedLevel: detectSavedLevel(storage)
-  };
+  // Crea o recupera el identificador local de instalación sin incluirlo en el estado.
+  getInstallationId(storage);
 
   const headerSlot = el('div', { attrs: { 'data-slot': 'header' } });
   const screenSlot = el('div', { attrs: { 'data-slot': 'screen' }, className: 'screen-slot' });
@@ -54,7 +50,7 @@ export async function createApp(root, { win = window, storage = safeStorage(win)
   function renderScreen(route) {
     switch (route) {
       case ROUTES.HOME:
-        return renderHomeScreen({ hasSave: session.hasSave, savedLevel: session.savedLevel, version: APP_VERSION });
+        return renderHomeScreen({ hasSave: saveSummary.hasSave, savedLevel: saveSummary.level, version: APP_VERSION });
       case ROUTES.SETTINGS:
         return renderSettingsScreen({ preferences });
       default:
@@ -65,6 +61,7 @@ export async function createApp(root, { win = window, storage = safeStorage(win)
   function render() {
     const route = router.current;
     const immersive = IMMERSIVE_ROUTES.includes(route);
+    const state = store.getState();
 
     mount(screenSlot, renderScreen(route));
 
@@ -77,10 +74,10 @@ export async function createApp(root, { win = window, storage = safeStorage(win)
       mount(
         headerSlot,
         renderResourceBar({
-          level: session.level,
-          gold: session.gold,
-          gems: session.gems,
-          materials: session.materials,
+          level: state.progression.level,
+          gold: state.resources.gold,
+          gems: state.resources.gems,
+          materials: state.resources.materials,
           nextEventLabel: 'Próximo evento',
           nextEventTime: '--:--'
         })
@@ -105,13 +102,25 @@ export async function createApp(root, { win = window, storage = safeStorage(win)
       if (!router.back()) router.go(ROUTES.DASHBOARD, { replace: true });
     },
     'continue-game'() {
-      if (!session.hasSave) return;
+      const loaded = loadGameState({ storage });
+      if (!loaded.hasSave) {
+        saveSummary = getSavedGameSummary(storage);
+        render();
+        showToast('No se encontró una partida válida.', { variant: 'error' });
+        return;
+      }
+
+      store.replaceState(loaded.state, { persist: false });
+      syncPreferencesFromState(loaded.state);
+      refreshSaveSummaryFromState(true);
       router.go(ROUTES.DASHBOARD, { replace: true });
       router.resetStack();
-      showToast('Partida cargada. ¡Al ring!', { variant: 'success' });
+      showToast(loaded.recovered ? 'Partida recuperada desde el respaldo.' : 'Partida cargada. ¡Al ring!', {
+        variant: 'success'
+      });
     },
     async 'new-game'() {
-      if (session.hasSave) {
+      if (saveSummary.hasSave) {
         const confirmed = await confirmModal({
           title: 'Nueva partida',
           body: 'Ya existe una partida guardada. Crear una nueva la sustituirá. ¿Deseas continuar?',
@@ -121,18 +130,31 @@ export async function createApp(root, { win = window, storage = safeStorage(win)
         });
         if (!confirmed) return;
       }
+
+      store.dispatch({ type: 'game/new', settings: settingsFromPreferences(preferences) });
+      refreshSaveSummaryFromState(true);
       router.go(ROUTES.DASHBOARD, { replace: true });
       router.resetStack();
-      showToast('La elección de clase y el tutorial llegan en el Paso 4.');
+      showToast('Nueva partida guardada. La elección de clase llega en el Paso 4.', { variant: 'success' });
     },
     'set-font-scale'(target) {
       preferences = applyPreferences(savePreferences({ ...preferences, fontScale: target.dataset.value }, storage), win.document);
-      render();
+      store.dispatch({
+        type: 'settings/update',
+        settings: { textSize: preferences.fontScale },
+        persist: saveSummary.hasSave
+      });
+      if (saveSummary.hasSave) refreshSaveSummaryFromState(true);
       showToast('Tamaño de texto actualizado.', { variant: 'success' });
     },
     'set-quality'(target) {
       preferences = applyPreferences(savePreferences({ ...preferences, quality: target.dataset.value }, storage), win.document);
-      render();
+      store.dispatch({
+        type: 'settings/update',
+        settings: { quality: preferences.quality },
+        persist: saveSummary.hasSave
+      });
+      if (saveSummary.hasSave) refreshSaveSummaryFromState(true);
       showToast('Calidad visual actualizada.', { variant: 'success' });
     }
   };
@@ -143,7 +165,10 @@ export async function createApp(root, { win = window, storage = safeStorage(win)
     const handler = actions[target.dataset.action];
     if (!handler) return;
     event.preventDefault();
-    Promise.resolve(handler(target)).catch(console.error);
+    Promise.resolve(handler(target)).catch((error) => {
+      console.error(error);
+      showToast('No se pudo completar la acción.', { variant: 'error' });
+    });
   }
 
   function onPopState() {
@@ -160,8 +185,28 @@ export async function createApp(root, { win = window, storage = safeStorage(win)
     }
   }
 
+  function refreshSaveSummaryFromState(hasSave) {
+    const state = store.getState();
+    saveSummary = {
+      hasSave,
+      source: hasSave ? 'current' : 'none',
+      level: hasSave ? state.progression.level : 0,
+      heroName: hasSave ? state.profile.heroName : null,
+      updatedAt: hasSave ? state.meta.lastSavedAt : null,
+      schemaVersion: hasSave ? state.schemaVersion : null
+    };
+  }
+
+  function syncPreferencesFromState(state) {
+    preferences = applyPreferences(
+      savePreferences({ fontScale: state.settings.textSize, quality: state.settings.quality }, storage),
+      win.document
+    );
+  }
+
   return {
     router,
+    store,
 
     async start() {
       clear(root);
@@ -170,6 +215,7 @@ export async function createApp(root, { win = window, storage = safeStorage(win)
       // El botón Atrás cierra primero cualquier modal abierto.
       disposers.push(router.addBackGuard(() => (isModalOpen() ? closeModal(null) : false)));
       disposers.push(router.subscribe(() => render()));
+      disposers.push(store.subscribe(() => render()));
 
       root.addEventListener('click', onClick);
       disposers.push(() => root.removeEventListener('click', onClick));
@@ -188,11 +234,16 @@ export async function createApp(root, { win = window, storage = safeStorage(win)
 
     destroy() {
       for (const dispose of disposers.splice(0)) dispose();
+      store.destroy();
       clear(root);
-    },
+    }
+  };
+}
 
-    /** Sólo para pruebas: datos provisionales de la cabecera. */
-    _session: session
+function settingsFromPreferences(preferences) {
+  return {
+    textSize: preferences.fontScale,
+    quality: preferences.quality
   };
 }
 
@@ -201,25 +252,5 @@ function safeStorage(win) {
     return win?.localStorage ?? null;
   } catch {
     return null;
-  }
-}
-
-function detectSave(storage) {
-  try {
-    return Boolean(storage?.getItem(GAME_CONFIG.STORAGE_KEYS.CURRENT_SAVE));
-  } catch {
-    return false;
-  }
-}
-
-function detectSavedLevel(storage) {
-  try {
-    const raw = storage?.getItem(GAME_CONFIG.STORAGE_KEYS.CURRENT_SAVE);
-    if (!raw) return 0;
-    const parsed = JSON.parse(raw);
-    const level = Number(parsed?.hero?.level ?? parsed?.level ?? 0);
-    return Number.isFinite(level) && level > 0 ? Math.floor(level) : 0;
-  } catch {
-    return 0;
   }
 }

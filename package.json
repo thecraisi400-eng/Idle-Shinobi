@@ -1,6 +1,6 @@
 {
   "name": "ring-de-campeones",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Ring de Campeones — juego de lucha libre y progreso, PWA vertical jugable sin conexión.",
   "private": true,
   "type": "module",

@@ -37,7 +37,7 @@ export function renderSettingsScreen({ preferences } = {}) {
         children: [
           fontGroup,
           qualityGroup,
-          card('Audio, vibración y respaldo', 'Volumen, vibración, exportar/importar y reinicio se activan en el Paso 9.'),
+          card('Audio, vibración y respaldo', 'El estado ya guarda ajustes y progreso con respaldo. La interfaz de exportar/importar llega en el Paso 9.'),
           button({
             label: 'Volver',
             className: 'btn btn--ghost',
