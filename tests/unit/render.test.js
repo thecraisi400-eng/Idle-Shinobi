@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { button, card, clear, el, mount, placeholder } from '../../js/ui/render.js';
+import { button, clear, el, mount } from '../../js/ui/render.js';
+import { compactCard, progressBar, statusPanel } from '../../js/ui/components/ui-kit.js';
 
 describe('render seguro', () => {
   it('asigna texto con textContent y nunca interpreta HTML', () => {
@@ -38,8 +39,13 @@ describe('render seguro', () => {
     expect(box.textContent).toBe('nuevo');
   });
 
-  it('construye tarjetas y marcadores de posición', () => {
-    expect(card('Título', 'Texto').querySelector('.card__title').textContent).toBe('Título');
-    expect(placeholder('🥊', 'Pendiente').querySelector('.placeholder__text').textContent).toBe('Pendiente');
+  it('construye tarjetas, estados y barras accesibles', () => {
+    expect(compactCard({ title: 'Título', meta: 'Texto' }).querySelector('h3').textContent).toBe('Título');
+    expect(statusPanel({ title: 'Vacío', text: 'Sin resultados' }).getAttribute('role')).toBe('status');
+
+    const progress = progressBar({ label: 'Experiencia', value: 25, max: 100 });
+    const bar = progress.querySelector('[role="progressbar"]');
+    expect(bar.getAttribute('aria-valuenow')).toBe('25');
+    expect(bar.getAttribute('aria-valuemax')).toBe('100');
   });
 });

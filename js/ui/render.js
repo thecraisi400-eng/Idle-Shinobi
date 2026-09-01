@@ -70,25 +70,3 @@ export function mount(container, node) {
   if (node) container.appendChild(node);
   return container;
 }
-
-/** Devuelve una tarjeta simple con título y texto. */
-export function card(title, text) {
-  return el('section', {
-    className: 'card',
-    children: [
-      el('h3', { className: 'card__title', text: title }),
-      text ? el('p', { className: 'card__text', text }) : null
-    ]
-  });
-}
-
-/** Bloque provisional para pantallas que se completan en pasos posteriores. */
-export function placeholder(icon, text) {
-  return el('div', {
-    className: 'placeholder',
-    children: [
-      el('span', { className: 'placeholder__icon', text: icon, attrs: { 'aria-hidden': 'true' } }),
-      el('p', { className: 'placeholder__text', text })
-    ]
-  });
-}

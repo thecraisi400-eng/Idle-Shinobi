@@ -1,5 +1,5 @@
 /**
- * Ring de Campeones — Portada (Paso 2, versión temporal)
+ * Ring de Campeones — Portada del Paso 4.
  * Muestra logo, nivel del guardado y botones. Sin luchador (docs/reglas.md).
  */
 
@@ -64,7 +64,7 @@ export function renderHomeScreen({ hasSave = false, savedLevel = 0, version = '0
       el('p', { className: 'home__subtitle', text: 'Sube al ring, gana títulos y hazte leyenda.' }),
       saveLine,
       actions,
-      el('p', { className: 'home__version', text: `Versión ${version} — Paso 3` })
+      el('p', { className: 'home__version', text: `Versión ${version} — Interfaz Paso 4` })
     ]
   });
 }

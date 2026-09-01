@@ -5,6 +5,7 @@
 
 import { el, button } from '../render.js';
 import { formatNumber } from '../../core/formatters.js';
+import { countdownText } from './ui-kit.js';
 
 /**
  * @param {Object} data
@@ -23,11 +24,13 @@ export function renderResourceBar({
   nextEventLabel = 'Próximo evento',
   nextEventTime = '--:--'
 } = {}) {
-  const levelBox = el('div', {
+  const levelBox = button({
+    label: `Volver al panel, nivel ${level}`,
     className: 'resource-bar__level',
-    attrs: { 'aria-label': `Nivel ${level}` },
+    action: 'go-dashboard',
+    attrs: { 'aria-label': `Volver al panel, nivel ${level}`, 'data-testid': 'btn-dashboard' },
     children: [
-      el('span', { className: 'resource-bar__level-label', text: 'NIVEL', attrs: { 'aria-hidden': 'true' } }),
+      el('span', { className: 'resource-bar__level-label', text: 'PANEL', attrs: { 'aria-hidden': 'true' } }),
       el('span', {
         className: 'resource-bar__level-value',
         text: formatNumber(level),
@@ -57,7 +60,9 @@ export function renderResourceBar({
     className: 'next-event',
     children: [
       el('span', { text: nextEventLabel }),
-      el('span', { className: 'next-event__value', text: nextEventTime })
+      typeof nextEventTime === 'number'
+        ? countdownText(nextEventTime, { className: 'next-event__value' })
+        : el('span', { className: 'next-event__value', text: nextEventTime })
     ]
   });
 

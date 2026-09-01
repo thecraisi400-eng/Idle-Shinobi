@@ -7,6 +7,7 @@
  */
 
 import { createInitialState, QUALITY_OPTIONS, RESOURCE_KEYS, TEXT_SIZE_OPTIONS } from './initial-state.js';
+import { CLASSES } from '../config/classes.js';
 import { createResetState, saveGameState } from './persistence.js';
 import { cloneAndValidateState, cloneSerializable, deepFreeze, isResourceKey, isSafeId } from './validators.js';
 
@@ -112,6 +113,12 @@ export function createGameStore({
         break;
       case 'profile/setHeroName':
         applyHeroName(next, action.heroName);
+        break;
+      case 'profile/selectClass':
+        applyClassSelection(next, action.classId);
+        break;
+      case 'profile/completeTutorial':
+        completeTutorial(next);
         break;
       case 'resources/add':
         applyResourceDelta(next, readResourceAmounts(action, { requirePositive: true }), 1);
@@ -247,6 +254,20 @@ function applyHeroName(state, heroName) {
     throw new GameStoreError('El nombre del héroe no es válido.');
   }
   state.profile.heroName = clean;
+}
+
+function applyClassSelection(state, classId) {
+  const fighterClass = Object.values(CLASSES).find((entry) => entry.id === classId && entry.isPlayable);
+  if (!fighterClass) throw new GameStoreError('La clase seleccionada no es jugable.');
+  if (state.profile.classId !== null && state.profile.classId !== fighterClass.id) {
+    throw new GameStoreError('La clase del héroe es permanente para esta partida.');
+  }
+  state.profile.classId = fighterClass.id;
+}
+
+function completeTutorial(state) {
+  if (!state.profile.classId) throw new GameStoreError('Debes elegir una clase antes de completar el tutorial.');
+  state.profile.tutorialDone = true;
 }
 
 function applySettingsPatch(state, patch) {
