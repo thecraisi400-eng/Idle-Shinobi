@@ -1,0 +1,126 @@
+/* ===== ESTRUCTURA: header + cuerpo + menú (28.03) ===== */
+
+body{display:flex;justify-content:center;background:var(--bg-0)}
+
+#app{
+  position:relative;
+  width:100%;
+  max-width:var(--app-max);      /* Sugerencia #4: marco tipo móvil */
+  height:100dvh;
+  display:grid;
+  grid-template-rows:auto var(--h-xp) 1fr auto;
+  background:var(--bg-1);
+  overflow:hidden;
+  box-shadow:var(--sh-2);
+}
+
+/* ---------- HEADER / HUD ---------- */
+#hud{
+  height:calc(var(--h-header) + var(--safe-t));
+  padding:var(--safe-t) var(--sp-3) 0;
+  display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);
+  background:linear-gradient(180deg,var(--bg-3),var(--bg-2));
+  border-bottom:1px solid var(--bg-4);
+  z-index:20;
+}
+.hud-hero{display:flex;align-items:center;gap:var(--sp-2);min-width:0}
+.hud-avatar{
+  width:34px;height:34px;flex:none;display:grid;place-items:center;
+  font-size:18px;border-radius:var(--r-full);
+  background:var(--bg-4);border:1px solid #34343f;
+}
+.hud-hero-txt{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.hud-name{font-size:var(--fs-sm);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.hud-sub{font-size:var(--fs-xs);color:var(--txt-2);display:flex;align-items:center;gap:5px}
+.hud-sub b{color:var(--txt)}
+.hud-sub .dot{color:var(--txt-3)}
+.hud-sub .pw{color:var(--oro)}
+
+.hud-right{display:flex;gap:var(--sp-2);flex:none}
+.coin{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 9px;border-radius:var(--r-full);
+  font-size:var(--fs-xs);font-weight:700;font-variant-numeric:tabular-nums;
+  background:var(--bg-1);border:1px solid var(--bg-4);
+}
+.coin-oro{color:var(--oro);border-color:#4a3c18}
+.coin-gema{color:var(--gema);border-color:#1d4054}
+.coin-ico{font-size:13px}
+.coin-ico.gem{filter:drop-shadow(0 0 5px rgba(110,200,255,.8))} /* 08.15 icono con brillo */
+.coin.bump{animation:bump var(--dur-slow) var(--ease)}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+
+/* ---------- BARRA XP ---------- */
+#xpbar{height:var(--h-xp);background:var(--bg-2);overflow:hidden}
+#xpbar-fill{height:100%;background:linear-gradient(90deg,var(--oro),#ffd97a);transition:width var(--dur-slow) var(--ease)}
+
+/* ---------- CUERPO ---------- */
+#screen{
+  overflow-y:auto;overflow-x:hidden;
+  padding:var(--sp-4) var(--sp-3) var(--sp-5);
+  -webkit-overflow-scrolling:touch;
+}
+#screen.fade-out{opacity:0;transform:translateY(6px);transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease)}
+#screen.fade-in{opacity:1;transform:none;transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease)}
+
+/* ---------- MENÚ INFERIOR ---------- */
+#menu{
+  height:calc(var(--h-menu) + var(--safe-b));
+  padding-bottom:var(--safe-b);
+  display:grid;grid-template-columns:repeat(6,1fr);
+  background:linear-gradient(0deg,var(--bg-3),var(--bg-2));
+  border-top:1px solid var(--bg-4);
+  z-index:20;
+}
+.tab{
+  position:relative;
+  min-height:var(--tap);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  color:var(--txt-3);transition:color var(--dur-fast) var(--ease);
+}
+.tab-ico{font-size:19px;line-height:1;transition:transform var(--dur) var(--ease);filter:grayscale(.6) opacity(.75)}
+.tab-txt{font-size:10.5px;font-weight:600;letter-spacing:.2px}
+.tab.active{color:var(--oro)}
+.tab.active .tab-ico{transform:translateY(-2px) scale(1.12);filter:none}
+.tab.active::before{
+  content:"";position:absolute;top:0;left:22%;right:22%;height:2.5px;
+  background:var(--oro);border-radius:0 0 3px 3px;box-shadow:var(--glow-oro);
+}
+.tab:active{transform:scale(.94)}
+/* Sugerencia #3: punto de novedad */
+.dot-new{position:absolute;top:9px;right:calc(50% - 17px);width:7px;height:7px;border-radius:50%;background:var(--bad);border:1.5px solid var(--bg-2)}
+
+/* ---------- TOASTS (10.10) ---------- */
+#toasts{
+  position:absolute;left:0;right:0;
+  bottom:calc(var(--h-menu) + var(--safe-b) + 10px);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  pointer-events:none;z-index:60;padding:0 var(--sp-4);
+}
+.toast{
+  max-width:100%;
+  padding:9px 14px;border-radius:var(--r-full);
+  background:rgba(30,30,40,.96);border:1px solid var(--bg-4);
+  font-size:var(--fs-sm);font-weight:600;box-shadow:var(--sh-1);
+  display:flex;align-items:center;gap:8px;
+  animation:toast-in var(--dur) var(--ease);
+}
+.toast.out{animation:toast-out var(--dur) var(--ease) forwards}
+.toast.ok{border-color:#2c6b45}
+.toast.bad{border-color:#6b2c2c}
+@keyframes toast-in{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes toast-out{to{opacity:0;transform:translateY(-8px) scale(.97)}}
+
+/* ---------- BLOQUEO HORIZONTAL (28.09) ---------- */
+#rotate-lock{display:none}
+@media (orientation:landscape) and (max-height:520px){
+  #app{display:none}
+  #rotate-lock{
+    display:grid;place-items:center;position:fixed;inset:0;
+    background:var(--bg-1);z-index:999;text-align:center;padding:var(--sp-5);
+  }
+  .rotate-icon{font-size:52px;animation:tilt 1.6s ease-in-out infinite}
+  #rotate-lock h2{font-size:var(--fs-lg);margin:var(--sp-3) 0 var(--sp-1)}
+  #rotate-lock p{color:var(--txt-2);font-size:var(--fs-sm)}
+  @keyframes tilt{0%,100%{transform:rotate(0)}50%{transform:rotate(-90deg)}}
+}
