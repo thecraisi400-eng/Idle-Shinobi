@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0e0e12">
+<title>Oro y Gloria</title>
+<link rel="stylesheet" href="styles/reset.css">
+<link rel="stylesheet" href="styles/variables.css">
+<link rel="stylesheet" href="styles/layout.css">
+<link rel="stylesheet" href="styles/components.css">
+<link rel="stylesheet" href="styles/heroe.css">
+<link rel="stylesheet" href="styles/arena.css">
+<link rel="stylesheet" href="styles/seleccion.css">
+<link rel="stylesheet" href="styles/equipo.css">
+<link rel="stylesheet" href="styles/arbol.css">
+<link rel="stylesheet" href="styles/eventos.css">
+<link rel="stylesheet" href="styles/coliseo.css">
+<link rel="stylesheet" href="styles/tienda.css">
+<link rel="stylesheet" href="styles/perfil.css">
+<link rel="stylesheet" href="styles/tutorial.css">
+
+<!-- PWA (28.15): instalable y con soporte offline -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/icons/favicon-64.png" sizes="64x64" type="image/png">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<meta name="description" content="Oro y Gloria: carrera de lucha libre por autobatalla. Entrena, equipa, compite en eventos y conquista el Coliseo.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Oro y Gloria">
+<meta name="color-scheme" content="dark">
+</head>
+<body>
+
+<!-- Aviso de orientación horizontal (28.09 bloqueado vertical) -->
+<div id="rotate-lock">
+  <div class="rotate-inner">
+    <div class="rotate-icon">📱</div>
+    <h2>Gira tu dispositivo</h2>
+    <p>Oro y Gloria se juega en vertical.</p>
+  </div>
+</div>
+
+<!-- Marco del juego: máx 480px centrado -->
+<div id="app">
+
+  <!-- HEADER / HUD superior (10.03 monedas + nivel, 10.05 poder junto al nivel) -->
+  <header id="hud">
+    <div class="hud-left">
+      <div class="hud-hero">
+        <span class="hud-avatar">🤼</span>
+        <div class="hud-hero-txt">
+          <span class="hud-name" id="hud-name">Luchador</span>
+          <span class="hud-sub">
+            <b>Nv <span id="hud-nivel">1</span></b>
+            <span class="dot">·</span>
+            <span class="pw">⚡ <span id="hud-poder">0</span></span>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="hud-right">
+      <div class="coin coin-oro" title="Oro">
+        <span class="coin-ico">🪙</span><span id="hud-oro">100</span>
+      </div>
+      <div class="coin coin-gema" title="Gemas">
+        <span class="coin-ico gem">💎</span><span id="hud-gemas">0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Barra de XP fina bajo el header -->
+  <div id="xpbar"><div id="xpbar-fill" style="width:12%"></div></div>
+
+  <!-- CUERPO: aquí se renderiza cada pantalla -->
+  <main id="screen" aria-live="polite"></main>
+
+  <!-- MENÚ INFERIOR de 6 opciones (10.04 / 28.04 iconos + texto) -->
+  <nav id="menu" role="tablist">
+    <button class="tab" data-screen="panel"   role="tab"><span class="tab-ico">🏠</span><span class="tab-txt">Panel</span><i class="dot-new" hidden></i></button>
+    <button class="tab" data-screen="arena"   role="tab"><span class="tab-ico">🥊</span><span class="tab-txt">Arena</span><i class="dot-new" hidden></i></button>
+    <button class="tab" data-screen="heroe"   role="tab"><span class="tab-ico">🦾</span><span class="tab-txt">Héroe</span><i class="dot-new" hidden></i></button>
+    <button class="tab" data-screen="eventos" role="tab"><span class="tab-ico">🏟️</span><span class="tab-txt">Eventos</span><i class="dot-new" hidden></i></button>
+    <button class="tab" data-screen="coliseo" role="tab"><span class="tab-ico">🥇</span><span class="tab-txt">Coliseo</span><i class="dot-new" hidden></i></button>
+    <button class="tab" data-screen="tienda"  role="tab"><span class="tab-ico">🛒</span><span class="tab-txt">Tienda</span><i class="dot-new" hidden></i></button>
+  </nav>
+
+  <!-- Contenedor de toasts (10.10) -->
+  <div id="toasts"></div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a35038b41a54acce',t:'MTc4ODM5MDk3Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

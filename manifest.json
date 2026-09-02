@@ -1,0 +1,28 @@
+{
+  "name": "Oro y Gloria — Lucha Libre",
+  "short_name": "Oro y Gloria",
+  "description": "Carrera de lucha libre por autobatalla: entrena, equipa, compite en eventos y conquista el Coliseo.",
+  "lang": "es",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
+  "orientation": "portrait",
+  "background_color": "#0e0e12",
+  "theme_color": "#0e0e12",
+  "categories": ["games", "sports", "entertainment"],
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Luchar", "short_name": "Arena", "url": "./index.html#arena",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Eventos", "short_name": "Eventos", "url": "./index.html#eventos",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Coliseo", "short_name": "Coliseo", "url": "./index.html#coliseo",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
