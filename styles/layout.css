@@ -56,10 +56,40 @@ body{display:flex;justify-content:center;background:var(--bg-0)}
 
 /* ---------- CUERPO ---------- */
 #screen{
-  overflow-y:auto;overflow-x:hidden;
+  position:relative;
+  overflow:hidden;
   padding:var(--sp-4) var(--sp-3) var(--sp-5);
-  -webkit-overflow-scrolling:touch;
 }
+.screen-root{
+  min-width:0;
+  transform:translate3d(0,calc(var(--screen-page-offset, 0) * -1px),0);
+  transition:transform var(--dur) var(--ease);
+  will-change:transform;
+}
+
+/* El contenido nunca obliga a desplazar la pantalla: se avanza entre páginas
+   de alto completo, conservando las tarjetas y los objetivos táctiles grandes. */
+#screen-pager{
+  position:absolute;
+  right:var(--sp-3);
+  bottom:calc(var(--h-menu) + var(--safe-b) + var(--sp-3));
+  min-height:40px;
+  display:flex;align-items:center;gap:4px;
+  padding:3px;
+  border:1px solid rgba(232,182,76,.45);border-radius:var(--r-full);
+  background:rgba(21,21,28,.96);box-shadow:var(--sh-2);
+  z-index:45;
+}
+#screen-page-status{
+  min-width:44px;text-align:center;
+  color:var(--oro);font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;
+}
+.screen-page-btn{
+  width:34px;min-height:34px;display:grid;place-items:center;
+  border-radius:var(--r-full);font-size:26px;line-height:1;color:var(--txt);
+}
+.screen-page-btn:disabled{opacity:.32}
+.screen-page-btn:not(:disabled):active{background:var(--oro-soft);transform:scale(.94)}
 #screen.fade-out{opacity:0;transform:translateY(6px);transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease)}
 #screen.fade-in{opacity:1;transform:none;transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease)}
 
@@ -110,6 +140,11 @@ body{display:flex;justify-content:center;background:var(--bg-0)}
 .toast.bad{border-color:#6b2c2c}
 @keyframes toast-in{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes toast-out{to{opacity:0;transform:translateY(-8px) scale(.97)}}
+
+@media (max-height:640px){
+  #screen{padding-top:var(--sp-3);padding-bottom:var(--sp-4)}
+  #screen-pager{bottom:calc(var(--h-menu) + var(--safe-b) + var(--sp-2))}
+}
 
 /* ---------- BLOQUEO HORIZONTAL (28.09) ---------- */
 #rotate-lock{display:none}

@@ -5,7 +5,7 @@
      · Actualiza en segundo plano y avisa al jugador (Sugerencia #2 del Paso 15).
    Cambiar VERSION en cada despliegue: eso invalida la caché anterior. */
 
-const VERSION = 'og-v1.0.0';
+const VERSION = 'og-v1.1.0';
 const CACHE = `oro-y-gloria-${VERSION}`;
 
 const ARCHIVOS = [
