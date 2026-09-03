@@ -21,6 +21,7 @@ import {
 import { generarRival } from '../systems/rival-gen.js';
 
 export function render(root) {
+  root.classList.add('hero-screen');
   if (!S.perfil.clase) return pintarSelector(root);
   return pintarFicha(root);
 }
@@ -329,8 +330,8 @@ function pintarFicha(root) {
         el('div.sf-head', {},
           el('span.sf-nom', {}, `${st.ico} ${st.nombre}`),
           el('span.sf-val', { style: { color: st.color } },
-            String(base),
-            v !== base ? el('small', { text: ` → ${v}` }) : null,
+            fmt(base, 2),
+            v !== base ? el('small', { text: ` → ${fmt(v, 2)}` }) : null,
             enTope ? el('small.tope', { text: ' MAX' }) : null
           )
         ),
@@ -436,11 +437,15 @@ function pintarFicha(root) {
   };
 
   root.append(
-    el('div.sec-title', { text: 'Ficha del luchador' }), cabecera,
-    avisoBox,
-    rasgosBox,
-    el('div.sec-title', { text: '💪 Mejorar estadísticas' }), listaSt,
-    el('div.sec-title', { text: '⚔️ Tu próximo rival' }), compBox
+    el('section.hero-overview', {},
+      el('div.sec-title', { text: 'Ficha del luchador' }), cabecera, avisoBox, rasgosBox
+    ),
+    el('section.hero-panel', {},
+      el('div.sec-title', { text: '💪 Mejorar estadísticas' }), listaSt
+    ),
+    el('section.hero-panel', {},
+      el('div.sec-title', { text: '⚔️ Tu próximo rival' }), compBox
+    )
   );
 
   refrescarTodo();

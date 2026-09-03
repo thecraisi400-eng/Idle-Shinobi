@@ -1,5 +1,21 @@
 /* ===== PANTALLA HÉROE — Paso 3 ===== */
 
+/* Ficha compacta en cuadros: mejora y rival quedan juntos en una sola vista. */
+.hero-screen{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.hero-overview{grid-column:1 / -1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-2)}
+.hero-overview > .sec-title,.hero-overview > .ficha-card{grid-column:1 / -1}
+.hero-panel{min-width:0;display:grid;gap:var(--sp-2);align-content:start}
+.hero-panel .sec-title{margin:0}
+.hero-panel .card{min-width:0}
+.hero-panel .stat-fila{padding:7px 0}
+.hero-panel .sf-efecto{font-size:11px;line-height:1.3}
+.hero-panel .sf-acciones{margin-top:6px}
+
+@media (max-width:380px){
+  .hero-screen,.hero-overview{grid-template-columns:1fr}
+  .hero-panel,.hero-overview{grid-column:1 / -1}
+}
+
 /* Selector de clases */
 .clase-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-bottom:var(--sp-4)}
 .clase-card{

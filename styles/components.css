@@ -5,7 +5,7 @@
   display:flex;align-items:center;gap:8px;
   font-size:var(--fs-xs);font-weight:800;letter-spacing:1.4px;
   text-transform:uppercase;color:var(--txt-3);
-  margin:var(--sp-4) 0 var(--sp-2);
+  margin:var(--sp-2) 0 0;
 }
 .sec-title::after{content:"";flex:1;height:1px;background:var(--bg-4)}
 .sec-title:first-child{margin-top:0}
