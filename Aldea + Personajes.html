@@ -79,7 +79,7 @@ button{font-family:inherit}
 }
 #interact:active{filter:brightness(1.15)}
 /* ---------- Barra de habilidades: 4 círculos en zigzag vertical (esquina inferior derecha, mitad inferior) ---------- */
-#skills{position:absolute; right:4px; bottom:14px; width:104px; height:220px; pointer-events:none; z-index:11}
+#skills{position:absolute; right:4px; bottom:14px; width:104px; height:276px; pointer-events:none; z-index:11}
 .skl{
   position:absolute; width:50px; height:50px; border-radius:50%; pointer-events:auto;
   background:linear-gradient(#8a5a33,#5a3418); border:2.5px solid rgba(243,226,184,.8);
@@ -92,6 +92,7 @@ button{font-family:inherit}
 .skl.s1{right:6px; top:56px}
 .skl.s2{right:50px; top:112px}
 .skl.s3{right:6px; top:168px}
+.skl.s4{right:50px; top:224px}
 .skl .num{position:absolute; top:-5px; left:-3px; min-width:15px; background:#3a2a18; border:1px solid rgba(243,226,184,.7); border-radius:8px; font-size:8.5px; font-weight:800; color:#ffe9c0; padding:0 3px; text-align:center; pointer-events:none}
 .skl .mp{position:absolute; bottom:-5px; left:50%; transform:translateX(-50%); background:#2c5a86; border:1px solid rgba(255,255,255,.45); border-radius:8px; font-size:8px; font-weight:800; color:#fff; padding:0 5px; pointer-events:none; white-space:nowrap}
 .skl .cd{position:absolute; inset:0; border-radius:50%; display:none; align-items:center; justify-content:center;
@@ -261,6 +262,9 @@ button{font-family:inherit}
   </div>
 </div>
 
+<!-- Selector de invocación Uchiha -->
+<div id="ovSummon" class="ov"><div class="panel"><div class="pHead"><b>🌀 Kuchiyose no Jutsu</b><button class="x" data-close="ovSummon">✕</button></div><div class="pBody"><div style="font-size:11px;color:#6a5232;margin-bottom:10px">Elige la invocación que aparecerá tras los sellos y la nube de humo.</div><div id="summonChoices" class="grid" style="grid-template-columns:repeat(3,1fr)"></div></div></div></div>
+
 <!-- Mochila -->
 <div id="ovInv" class="ov">
   <div class="panel">
@@ -297,7 +301,7 @@ button{font-family:inherit}
   <div class="panel">
     <div class="pHead"><b>✨ Habilidades</b><button class="x" data-close="ovSk">✕</button></div>
     <div class="pBody">
-      <div style="font-size:11px;color:#6a5232;margin:0 0 8px;line-height:1.4">Toca un jutsu aprendido y elige en qué <b>ranura (1‑4)</b> equiparlo. Las ranuras son los <b>4 círculos</b> de la esquina inferior derecha: tócalos para lanzarlos. Cuestan 💧 MP, que se regenera solo con el tiempo.</div>
+      <div style="font-size:11px;color:#6a5232;margin:0 0 8px;line-height:1.4">Toca un jutsu aprendido y elige en qué <b>ranura (1‑5)</b> equiparlo. Las ranuras son los <b>5 círculos</b> de la esquina inferior derecha: tócalos para lanzarlos. Cuestan 💧 MP, que se regenera solo con el tiempo.</div>
       <div id="skGrid" class="grid" style="grid-template-columns:repeat(4,1fr)"></div>
       <div style="font-size:11px;font-weight:800;color:#4a3518;margin:10px 0 6px">📖 Jutsus conocidos</div>
       <div id="skList" class="rowlist"></div>
@@ -353,10 +357,10 @@ button{font-family:inherit}
     <div class="pBody">
       <div class="helpline"><div class="he">🕹️</div><div><b>Movimiento:</b> mantén pulsado <b>cualquier punto del suelo</b> y arrastra. El joystick aparece justo donde tocaste (zona izquierda/central). Un toque rápido sin arrastrar = recolectar/interactuar.</div></div>
       <div class="helpline"><div class="he">💬</div><div><b>Interactuar:</b> acércate a un aldeano, árbol, roca o arbusto y aparecerá un <b>pequeño botón flotando sobre él</b>. Con <b>un solo toque</b> basta: hablar, recolectar o entrenar.</div></div>
-      <div class="helpline"><div class="he">✨</div><div><b>Habilidades:</b> equípalas desde <b>✨ Habilidad</b> (menú izquierdo) en los 4 círculos de la esquina inferior derecha. Tócalos para lanzarlos; gastan 💧 MP, que se regenera solo.</div></div>
+      <div class="helpline"><div class="he">✨</div><div><b>Habilidades:</b> equípalas desde <b>✨ Habilidad</b> (menú izquierdo) en los 5 círculos de la esquina inferior derecha. Tócalos para lanzarlos; gastan 💧 MP, que se regenera solo.</div></div>
       <div class="helpline"><div class="he">🎒</div><div><b>Menú izquierdo:</b> Mochila (objetos), Equipo (6 ranuras de arma), Habilidad (jutsus) y Mejora (sube el nivel de tus armas).</div></div>
       <div class="helpline"><div class="he">🍥</div><div><b>Misiones:</b> habla con la Hokage en la mansión del norte para recibir encargos y ganar oro y EXP.</div></div>
-      <div class="helpline"><div class="he">⌨️</div><div><b>PC:</b> WASD / flechas para moverte, E para interactuar, I mochila, Q equipo, H habilidades, U mejora, 1‑4 lanzar jutsu.</div></div>
+      <div class="helpline"><div class="he">⌨️</div><div><b>PC:</b> WASD / flechas para moverte, E para interactuar, I mochila, Q equipo, H habilidades, U mejora, 1‑5 lanzar jutsu.</div></div>
     </div>
   </div>
 </div>
@@ -550,8 +554,8 @@ function defaultState(){
     nodes:{},                 // id -> {left, dead, at}
     quests:{idx:0, prog:{}, done:[]},
     buffs:{atk:0,spd:0,exp:0},
-    skills:{slots:[null,null,null,null]},   // 4 ranuras de jutsu equipados
-    bunshin:0,                              // segundos restantes de Kage Bunshin (no se guarda)
+    skills:{slots:[null,null,null,null,null]}, // 5 ranuras de jutsu equipados
+    bunshin:0, sharingan:0, genjutsu:0, summon:null, fx:[], // efectos temporales (no se guardan)
     time:0, play:0,
     set:{snd:1,vib:1,day:1,qual:1},
   };
@@ -697,8 +701,8 @@ function loadGame(){
     s.res=d.res||s.res; s.nodes=d.nodes||{}; s.quests=d.quests||s.quests; s.buffs=d.buffs||s.buffs;
     s.play=d.play||0; if(d.set)Object.assign(s.set,d.set);
     if(d.skills&&Array.isArray(d.skills.slots)){
-      s.skills.slots=d.skills.slots.slice(0,4).map(x=>SKILLS[x]?x:null);
-      while(s.skills.slots.length<4)s.skills.slots.push(null);
+      s.skills.slots=d.skills.slots.slice(0,5).map(x=>SKILLS[x]?x:null);
+      while(s.skills.slots.length<5)s.skills.slots.push(null);
     }
     G=s; dirtyStats(); return true;
   }catch(e){ return false; }
@@ -745,7 +749,7 @@ function bindInput(){
     if(e.key==='e'||e.key==='E')pressInteract(); 
     if(e.key==='i'||e.key==='I')openOv('ovInv'); if(e.key==='q'||e.key==='Q')openOv('ovEq'); if(e.key==='u'||e.key==='U')openOv('ovUp');
     if(e.key==='h'||e.key==='H')openOv('ovSk');
-    if(e.key>='1'&&e.key<='4')useSkill(+e.key-1);
+    if(e.key>='1'&&e.key<='5')useSkill(+e.key-1);
     if(e.key==='Escape')closeAll();
   });
   addEventListener('keyup',e=>{ IN.keys[e.key.toLowerCase()]=0; });
@@ -1221,6 +1225,7 @@ function drawPerson(c,o,time,isPlayer,heroOv){
   c.fillStyle='#222';
   const ex=fx*2.2, ey=fy*1.4;
   c.beginPath(); c.arc(-2.2+ex,-8+ey,1,0,7); c.arc(2.2+ex,-8+ey,1,0,7); c.fill();
+  if(isPlayer&&G.sharingan>0){ c.fillStyle='#d71920'; c.beginPath(); c.arc(-2.2+ex,-8+ey,1.35,0,7); c.arc(2.2+ex,-8+ey,1.35,0,7); c.fill(); c.fillStyle='#111'; c.beginPath(); c.arc(-2.2+ex,-8+ey,.38,0,7); c.arc(2.2+ex,-8+ey,.38,0,7); c.fill(); }
   if(isPlayer&&H.blush){ c.fillStyle='rgba(240,130,130,.5)';
     c.beginPath(); c.arc(-4+ex*.5,-5.4,1.3,0,7); c.arc(4+ex*.5,-5.4,1.3,0,7); c.fill(); }
   if(isPlayer&&H.mouth==='smile'){ c.strokeStyle='rgba(60,30,20,.85)'; c.lineWidth=.9;
@@ -1263,6 +1268,10 @@ function update(dt,time){
   p.mp=clamp(p.mp+1.15*dt,0,stats().maxMp);
   /* habilidades: enfriamientos + Kage Bunshin */
   for(const k in SKCD)if(SKCD[k]>0)SKCD[k]=Math.max(0,SKCD[k]-dt);
+  if(G.sharingan>0){ p.mp-=dt; if(p.mp<=0){p.mp=0;G.sharingan=0;dirtyStats();toast('🔴 Sin chakra: Sharingan desactivado');} }
+  for(const n of NPCS)if(n.stun>0){n.stun=Math.max(0,n.stun-dt);}
+  for(let i=G.fx.length-1;i>=0;i--){const f=G.fx[i];f.t+=dt;if(f.type==='fireball'&&f.t/f.l>.82&&!f.hit){f.hit=1;uchiDamage(nearDummy(80),Math.round(stats().atk*2.4),'🔥');} if(f.type==='chidori'&&f.t/f.l>.8&&!f.hit){f.hit=1;uchiDamage(nearDummy(85),Math.round(stats().atk*3),'⚡');}if(f.t>=f.l)G.fx.splice(i,1);}
+  if(G.summon){const q=G.summon;q.t-=dt;q.hit-=dt;if(q.kind==='hawk'){q.x=p.x;q.y=p.y-30;} else if(q.kind==='snake'){let n=null,bd=180*180;for(const x of NPCS){const dd=dist2(q.x,q.y,x.x,x.y);if(dd<bd){bd=dd;n=x;}}if(n){q.x+=Math.sign(n.x-q.x)*42*dt;q.y+=Math.sign(n.y-q.y)*42*dt;if(bd<28*28&&q.hit<=0){q.hit=1;floatTxt(n.x,n.y-28,'🐍 -12 HP','#8fd08a');burst(n.x,n.y-10,'#6ba64d',8,50);}}}else if(q.hit<=0){q.hit=.8;const d=nearDummy(330);if(d)uchiDamage(d,Math.round(stats().atk*.8),'🐦');}if(q.t<=0){if(q.kind==='hawk')addFx('land',.45,{x:p.x,y:p.y});G.summon=null;}}
   if(G.bunshin>0){ G.bunshin-=dt; if(G.bunshin<=0){G.bunshin=0; trailClear();} }
   trailPush(p.x,p.y);   /* OPT: ring-buffer, ni un objeto nuevo por frame */
   tickSkillBar();
@@ -1285,6 +1294,7 @@ function update(dt,time){
   cam.x=lerp(cam.x,tx,1-Math.pow(.001,dt)); cam.y=lerp(cam.y,ty,1-Math.pow(.001,dt));
   /* NPCs */
   for(const n of NPCS){
+    if(n.stun>0){ n.walk=0; continue; }
     if(n.wander){
       n.wt-=dt;
       if(n.wt<=0){ n.wt=2+Math.random()*4; const a=Math.random()*6.28, r=Math.random()*n.wr;
@@ -1401,6 +1411,14 @@ function render(time){
       case T_CLONE:  ctx.globalAlpha=e.a; drawPerson(ctx,e.ref,time,true); ctx.globalAlpha=1; break;
     }
   }
+  /* jutsus Uchiha: formas Canvas ligeras, sin assets ni asignaciones por fotograma */
+  for(const f of G.fx){ const k=f.t/f.l;
+    if(f.type==='fireball'){const x=lerp(f.x,f.tx,k),y=lerp(f.y,f.ty,k);ctx.fillStyle='rgba(255,90,20,'+(1-k)+')';ctx.beginPath();ctx.arc(x,y,11+8*Math.sin(k*Math.PI),0,7);ctx.fill();ctx.fillStyle='#ffd15a';ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fill();}
+    else if(f.type==='chidori'){ctx.strokeStyle='#bdeaff';ctx.lineWidth=2.5;for(let j=0;j<7;j++){ctx.beginPath();ctx.moveTo(f.x,f.y-7);ctx.lineTo(lerp(f.x,f.tx,k)+Math.sin(j*3+k*20)*12,lerp(f.y,f.ty,k)-7+Math.cos(j*5+k*20)*10);ctx.stroke();}}
+    else if(f.type==='seal'){ctx.strokeStyle='#ead6a2';ctx.lineWidth=2;ctx.beginPath();ctx.arc(f.x,f.y,12+20*k,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(f.x-18,f.y);ctx.lineTo(f.x+18,f.y);ctx.moveTo(f.x,f.y-18);ctx.lineTo(f.x,f.y+18);ctx.stroke();}
+    else if(f.type==='smoke'){ctx.fillStyle='rgba(235,235,225,'+(1-k)+')';for(let j=0;j<6;j++){ctx.beginPath();ctx.arc(f.x+Math.sin(j*4)*18*k,f.y-8-Math.cos(j*2)*13*k,8+10*k,0,7);ctx.fill();}}
+  }
+  if(G.summon){const q=G.summon;ctx.font='30px system-ui';ctx.textAlign='center';ctx.textBaseline='middle'; if(q.kind==='crows'){for(let j=0;j<6;j++)ctx.fillText('🐦',q.x+Math.cos(G.time*5+j)*42,q.y-20+Math.sin(G.time*5+j)*17);}else if(q.kind==='hawk'){ctx.fillText('🦅',q.x,q.y-4); }else ctx.fillText('🐍',q.x,q.y);}
   /* partículas — OPT: sólo los slots activos del pool */
   for(let i=0;i<PARTS.length;i++){ const q=PARTS[i]; if(!q.active)continue;
     ctx.globalAlpha=1-q.t/q.l; ctx.fillStyle=q.col; ctx.fillRect(q.x-q.sz/2,q.y-q.sz/2,q.sz,q.sz); }
@@ -1418,6 +1436,9 @@ function render(time){
   ctx.restore();
   /* tinte de día/noche */
   if(TINT_STR){ ctx.fillStyle=TINT_STR; ctx.fillRect(0,0,VW,VH); }   /* OPT: string precalculado */
+  /* activación Sharingan y genjutsu: viñeta y ojos diferentes, una capa mínima */
+  if(G.sharingan>0){ctx.fillStyle='rgba(35,0,0,.12)';ctx.fillRect(0,0,VW,VH);}
+  if(G.genjutsu>0||G.fx.some(f=>f.type==='shareyes'||f.type==='geneyes')){const gen=G.genjutsu>0;ctx.save();ctx.translate(VW/2,VH*.28);ctx.fillStyle='rgba(0,0,0,.48)';ctx.fillRect(-120,-45,240,90);for(const x of [-48,48]){ctx.fillStyle='#d71920';ctx.beginPath();ctx.ellipse(x,0,34,20,0,0,7);ctx.fill();ctx.fillStyle='#111';ctx.beginPath();ctx.arc(x,0,7,0,7);ctx.fill();for(let j=0;j<3;j++){const a=(gen?G.time*.8:-G.time*6)+j*2.09;ctx.fillStyle='#111';ctx.beginPath();ctx.arc(x+Math.cos(a)*15,Math.sin(a)*10,3,0,7);ctx.fill();}}ctx.restore();}
   /* joystick dinámico */
   if(IN.joy){
     const j=IN.joy;
@@ -1451,7 +1472,7 @@ function drawMini(){
    nuevo en cada llamada (~3 por fotograma alimentaban al GC). Se recalcula
    como máx. 1 vez por fotograma; si algo toca equipo/buffs/atributos con el
    juego pausado (menús), dirtyStats() fuerza el recálculo inmediato. */
-const ST={atk:0,def:0,spd:0,crit:0,mag:0,maxMp:0};
+const ST={atk:0,def:0,spd:0,crit:0,evade:0,mag:0,maxMp:0};
 let stFrame=-1, stDirty=true;
 function dirtyStats(){ stDirty=true; }
 function stats(){
@@ -1462,8 +1483,9 @@ function stats(){
     atk+=wStat(e.id,e.lv,'atk'); def+=wStat(e.id,e.lv,'def'); mag+=wStat(e.id,e.lv,'mag'); crit+=wStat(e.id,e.lv,'crit'); spd+=i===G.active?wStat(e.id,e.lv,'spd'):0; }
   maxMp+=Math.round(mag*4);
   if(G.buffs.atk>0)atk=Math.round(atk*1.1);
-  if(G.buffs.spd>0)spd=Math.round(spd*110)/100;    /* OPT: sin toFixed (creaba un string) */
-  ST.atk=Math.round(atk); ST.def=Math.round(def); ST.spd=spd; ST.crit=crit; ST.mag=mag; ST.maxMp=Math.round(maxMp);
+  if(G.buffs.spd>0)spd=Math.round(spd*110)/100;
+  if(G.sharingan>0){ spd=Math.round(spd*120)/100; crit+=12; } // Sharingan: velocidad y doble golpe
+  ST.atk=Math.round(atk); ST.def=Math.round(def); ST.spd=spd; ST.crit=crit; ST.evade=G.sharingan>0?15:0; ST.mag=mag; ST.maxMp=Math.round(maxMp);
   return ST;
 }
 function expNext(l){return l*50+(l-1)*(l-1)*10;}
@@ -1804,17 +1826,20 @@ function renderShop(){
 }
 
 /* =========================================================
-   HABILIDADES · jutsus equipables en 4 ranuras
+   HABILIDADES · jutsus equipables en 5 ranuras
    ========================================================= */
 const SKILLS={
-  rasengan:{n:'Rasengan',e:'🌀',lv:1,mp:8,cd:6,d:'Espiral de chakra. Golpea el objetivo cercano: recolecta al instante o castiga el muñeco con gran fuerza.'},
-  shunshin:{n:'Shunshin',e:'🍃',lv:1,mp:5,cd:2.5,d:'Destello corporal: te desplazas al instante en la dirección a la que apuntas.'},
-  palma:{n:'Palma Mística',e:'💚',lv:3,mp:15,cd:12,d:'Chakra médico: recuperas el 40 % de tu HP máximo de inmediato.'},
-  katon:{n:'Katon: Bola Ígnea',e:'🔥',lv:5,mp:18,cd:14,d:'Onda de fuego que recolecta de golpe todos los árboles, rocas y arbustos cercanos.'},
-  bunshin:{n:'Kage Bunshin',e:'👥',lv:7,mp:22,cd:50,d:'Invoca 2 clones de sombra durante 60 s. Mientras duren, ganas +15 % EXP.'},
-  chidori:{n:'Chidori',e:'⚡',lv:9,mp:20,cd:12,d:'Mil rayos: entrenamiento relámpago sobre el muñeco cercano, con recompensa extra.'},
+  rasengan:{n:'Rasengan',e:'🌀',lv:1,mp:8,cd:6,d:'Espiral de chakra.'},
+  shunshin:{n:'Shunshin',e:'🍃',lv:1,mp:5,cd:2.5,d:'Destello corporal.'},
+  palma:{n:'Palma Mística',e:'💚',lv:3,mp:15,cd:12,d:'Chakra médico.'},
+  katon:{n:'Katon: Gōkakyū',e:'🔥',lv:1,mp:18,cd:12,uchi:1,d:'Gran bola de fuego concentrada que impacta al objetivo cercano.'},
+  genjutsu:{n:'Genjutsu Rápido',e:'👁️',lv:1,mp:14,cd:18,uchi:1,d:'Contacto visual: paraliza aldeanos cercanos durante 10 s.'},
+  sharingan:{n:'Sharingan',e:'🔴',lv:1,mp:0,cd:4,uchi:1,d:'Activa ojos rojos; consume 1 MP/s, +velocidad, +15% evasión y +12% doble golpe.'},
+  chidori:{n:'Chidori',e:'⚡',lv:1,mp:20,cd:12,uchi:1,d:'Estocada eléctrica de alta velocidad contra muñecos.'},
+  kuchiyose:{n:'Kuchiyose no Jutsu',e:'🦅',lv:1,mp:24,cd:30,uchi:1,d:'Elige cuervos, halcón o serpiente para una invocación táctica.'},
+  bunshin:{n:'Kage Bunshin',e:'👥',lv:7,mp:22,cd:50,d:'Invoca 2 clones de sombra durante 60 s.'},
 };
-const SKILLS_ORDER=['rasengan','shunshin','palma','katon','bunshin','chidori'];
+const SKILLS_ORDER=['katon','genjutsu','sharingan','chidori','kuchiyose','rasengan','shunshin','palma','bunshin'];
 const SKCD={};            // id -> segundos de enfriamiento restantes (no se guarda)
 /* OPT: estela del jugador en ring-buffer PREASIGNADO. Antes era
    TRAIL.push({x,y}) + TRAIL.shift() CADA fotograma: un objeto nuevo y un
@@ -1825,7 +1850,13 @@ let trHead=0, trLen=0;
 function trailPush(x,y){ const q=TRAIL[trHead]; q.x=x; q.y=y; trHead=(trHead+1)%TRAIL.length; if(trLen<TRAIL.length)trLen++; }
 function trailAt(k){ return TRAIL[(trHead-1-k+TRAIL.length*2)%TRAIL.length]; }  /* k=0 => el más nuevo */
 function trailClear(){ trHead=0; trLen=0; }
-function skillUnlocked(id){ return G.p.lvl>=(SKILLS[id]?SKILLS[id].lv:99); }
+function skillUnlocked(id){ const sk=SKILLS[id]; return !!sk&&G.p.lvl>=sk.lv&&(!sk.uchi||G.p.hero==='uchi1'); }
+
+function nearDummy(range){ let best=null,bd=range*range; for(const d of DUMMIES){const dd=dist2(G.p.x,G.p.y,d.x,d.y);if(dd<bd){bd=dd;best=d;}} return best; }
+function addFx(type,life,data){ G.fx.push(Object.assign({type,t:0,l:life},data||{})); }
+function uchiDamage(d,amount,label){ if(!d)return false; d.hit=NOW(); d.hp=(d.hp==null?100:d.hp)-amount; burst(d.x,d.y-16,'#ffb36a',12,90); floatTxt(d.x,d.y-42,'-'+amount+' HP '+label,'#ffcf74'); addExp(10); return true; }
+function showSummonChoices(){ const box=$('summonChoices'); box.innerHTML=''; const opts=[['crows','🐦','Cuervos','6 cuervos atacan durante 5 s'],['hawk','🦅','Halcón','Vuelas 12 s y aterrizas'],['snake','🐍','Serpiente','Busca y ataca un aldeano cercano']]; for(const o of opts){const b=document.createElement('button');b.className='card';b.innerHTML='<div class="e">'+o[1]+'</div><div class="n">'+o[2]+'</div><div style="font-size:9px;color:#6a5232">'+o[3]+'</div>';b.onclick=()=>{closeAll(); startSummon(o[0]);};box.appendChild(b);} openOv('ovSummon'); }
+function startSummon(kind){ const p=G.p; G.p.mp-=SKILLS.kuchiyose.mp; SKCD.kuchiyose=SKILLS.kuchiyose.cd; refreshHUD(); addFx('seal',1.1,{x:p.x,y:p.y}); setTimeout(()=>{G.summon={kind,x:p.x+(kind==='snake'?30:0),y:p.y-6,t:kind==='hawk'?12:kind==='crows'?5:10,hit:0}; addFx('smoke',.8,{x:p.x,y:p.y});},650); floatTxt(p.x,p.y-34,'🌀 ¡Kuchiyose!','#ddd'); sfx('ok'); vib(35); }
 
 /* --- efecto de cada jutsu (devolver false = no se lanza: sin coste ni enfriamiento) --- */
 const SKFX={
@@ -1852,41 +1883,19 @@ const SKFX={
     const h=Math.round(p.maxHp*.4); p.hp=clamp(p.hp+h,0,p.maxHp);
     burst(p.x,p.y-10,'#7ce08a',22,70); floatTxt(p.x,p.y-32,'+'+h+' ❤️','#7ce08a'); sfx('eat'); vib(25);
   },
-  katon(){ const p=G.p, R=140; let n=0;
-    for(let rr=24;rr<=R;rr+=26)for(let a=0;a<8;a++)burst(p.x+Math.cos(a*.785)*rr,p.y+Math.sin(a*.785)*rr-6,'#e0662b',2,40);
-    sfx('stone'); vib(35);
-    /* OPT: sólo se examinan las entidades del rango de Y afectado */
-    yRange(ALL_TREES,p.y-R,p.y+R);
-    for(let i=_r0;i<_r1;i++){ const t=ALL_TREES[i]; if(!t.node)continue; const st=nodeState('tree',i); if(st.dead)continue;
-      if(dist2(p.x,p.y,t.x,t.y)<R*R){ doGather({mode:'gather',kind:'tree',idx:i,o:t}); n++; } }
-    yRange(ALL_ROCKS,p.y-R,p.y+R);
-    for(let i=_r0;i<_r1;i++){ const r=ALL_ROCKS[i]; const st=nodeState('rock',i); if(st.dead)continue;
-      if(dist2(p.x,p.y,r.x,r.y)<R*R){ doGather({mode:'gather',kind:'rock',idx:i,o:r}); n++; } }
-    yRange(ALL_BUSH,p.y-R,p.y+R);
-    for(let i=_r0;i<_r1;i++){ const b=ALL_BUSH[i]; const st=nodeState('bush',i); if(st.dead)continue;
-      if(dist2(p.x,p.y,b.x,b.y)<R*R){ doGather({mode:'gather',kind:'bush',idx:i,o:b}); n++; } }
-    if(!n){ toast('🔥 No hay nada que quemar cerca'); return false; }
-    floatTxt(p.x,p.y-36,'🔥 ¡Katon! ×'+n,'#ff9d5a');
-  },
+  katon(){ const p=G.p, d=nearDummy(260); const a=d?Math.atan2(d.y-p.y,d.x-p.x):-Math.PI/2; addFx('fireball',.75,{x:p.x,y:p.y-9,a,tx:d?d.x:p.x+Math.cos(a)*230,ty:d?d.y:p.y+Math.sin(a)*230,hit:0}); sfx('stone'); vib(35); floatTxt(p.x,p.y-36,'🔥 Gōkakyū no Jutsu','#ff9d5a'); },
+  genjutsu(){ const p=G.p; let n=0; for(const x of NPCS){if(dist2(p.x,p.y,x.x,x.y)<150*150){x.stun=10;n++;}} if(!n){toast('👁️ Necesitas contacto visual con un aldeano');return false;} G.genjutsu=1.4; addFx('geneyes',1.4,{}); floatTxt(p.x,p.y-36,'👁️ Genjutsu: 10 s','#e35b66'); sfx('ok'); },
+  sharingan(){ if(G.sharingan>0){G.sharingan=0; dirtyStats(); toast('🔴 Sharingan desactivado');return false;} if(G.p.mp<1){toast('💧 Necesitas chakra para activar Sharingan');return false;} G.sharingan=999; addFx('shareyes',1.35,{}); dirtyStats(); floatTxt(G.p.x,G.p.y-36,'🔴 Sharingan activo','#ff5a5a'); sfx('ok'); },
   bunshin(){ const p=G.p;
     G.bunshin=60; G.buffs.exp=Math.max(G.buffs.exp,60);
     burst(p.x-16,p.y-8,'#e8e2d0',14,70); burst(p.x+16,p.y-8,'#e8e2d0',14,70);
     sfx('ok'); vib(30); floatTxt(p.x,p.y-36,'👥 ¡Kage Bunshin no Jutsu!','#e8e2d0');
   },
-  chidori(){ const p=G.p;
-    let best=null,bd=115*115;
-    for(const d of DUMMIES){ const dd=dist2(p.x,p.y,d.x,d.y); if(dd<bd){bd=dd;best=d;} }
-    if(!best){ toast('⚡ Necesitas un muñeco de entrenamiento cerca'); sfx('no'); return false; }
-    best.hit=NOW();
-    for(let i=0;i<10;i++)burst(best.x-10+Math.random()*20,best.y-26+Math.random()*20,'#9ad1ff',3,110);
-    sfx('ok'); vib(40);
-    const g=22+G.p.lvl*4; G.p.gold+=g;
-    floatTxt(best.x,best.y-46,'⚡ -'+(stats().atk*2)+' ⚔️','#9ad1ff'); floatTxt(best.x,best.y-60,'+'+g+' 🪙','#ffe08a');
-    addExp(20+G.p.lvl*3); qEvent('train',1);
-  },
+  chidori(){ const p=G.p,d=nearDummy(240); if(!d){toast('⚡ Necesitas un muñeco cerca');return false;} const a=Math.atan2(d.y-p.y,d.x-p.x); addFx('chidori',.65,{x:p.x,y:p.y,a,tx:d.x,ty:d.y,hit:0}); moveWithCollide(p,Math.cos(a)*Math.min(105,Math.hypot(d.x-p.x,d.y-p.y)-24),Math.sin(a)*Math.min(105,Math.hypot(d.x-p.x,d.y-p.y)-24),11); sfx('ok'); vib(45); },
+  kuchiyose(){ showSummonChoices(); return false; },
 };
 
-/* --- lanzar el jutsu de una ranura (0‑3) --- */
+/* --- lanzar el jutsu de una ranura (0‑4) --- */
 function useSkill(i){
   if(SCENE!=='play'||anyOverlay())return;
   const id=G.skills.slots[i];
@@ -1925,7 +1934,7 @@ function autoEquipSkills(){
 function renderSk(){
   $('skMp').textContent='💧 '+Math.floor(G.p.mp)+'/'+stats().maxMp+' MP';
   const grid=$('skGrid'); grid.innerHTML='';
-  for(let i=0;i<4;i++){
+  for(let i=0;i<5;i++){
     const id=G.skills.slots[i], sk=id&&SKILLS[id];
     const c=document.createElement('div'); c.className='card'+(sk?'':' empty');
     c.innerHTML=sk?`<div class="lv">R${i+1}</div><div class="e">${sk.e}</div><div class="n">${sk.n}</div>`
@@ -1944,7 +1953,7 @@ function renderSk(){
       if(sl>=0){ const b=document.createElement('button'); b.className='btn sm r'; b.textContent='Quitar'; b.onclick=()=>unequipSkill(sl); btns.appendChild(b); }
       else{
         const w=document.createElement('div'); w.style.cssText='display:flex;gap:4px';
-        for(let i=0;i<4;i++){ const b=document.createElement('button'); b.className='btn sm g'; b.style.padding='6px 9px'; b.textContent=i+1; b.onclick=()=>equipSkill(id,i); w.appendChild(b); }
+        for(let i=0;i<5;i++){ const b=document.createElement('button'); b.className='btn sm g'; b.style.padding='6px 9px'; b.textContent=i+1; b.onclick=()=>equipSkill(id,i); w.appendChild(b); }
         btns.appendChild(w);
         const hint=document.createElement('div'); hint.style.cssText='font-size:8.5px;color:#6a5232;font-weight:700'; hint.textContent='elige ranura'; btns.appendChild(hint);
       }
@@ -1954,12 +1963,12 @@ function renderSk(){
   }
 }
 
-/* --- barra de 4 círculos (esquina inferior derecha) --- */
-let SKEL=null;                 /* OPT: cache de los 4 círculos + sus .cd */
+/* --- barra de 5 círculos (esquina inferior derecha) --- */
+let SKEL=null;                 /* cache de los círculos + sus .cd */
 function renderSkillBar(){
   const bar=$('skills'); if(!bar)return; bar.innerHTML='';
   SKEL={els:[]};
-  for(let i=0;i<4;i++){
+  for(let i=0;i<5;i++){
     const id=G.skills.slots[i], sk=id&&SKILLS[id];
     const b=document.createElement('button'); b.className='skl s'+i+(sk?'':' empty');
     b.innerHTML=sk?`<span class="e">${sk.e}</span><span class="num">${i+1}</span><span class="mp">${sk.mp}💧</span><span class="cd"></span>`
@@ -1974,7 +1983,7 @@ function renderSkillBar(){
    (filter fuerza una capa de GPU nueva cada vez que se toca). */
 function tickSkillBar(){
   const S=SKEL; if(!S||!S.els.length)return;
-  for(let i=0;i<4;i++){
+  for(let i=0;i<5;i++){
     const it=S.els[i]; if(!it)continue;
     const id=G.skills.slots[i], sk=id&&SKILLS[id];
     if(!sk){ if(it.p!==-2){ it.p=-2; if(it.cd)it.cd.style.display='none'; it.el.style.filter=''; it.t=''; it.g=null; } continue; }
@@ -2150,7 +2159,7 @@ function startGame(fresh,heroId){
 /* ---------- selector de héroe (Ryo · Ren · Kenta) ---------- */
 const HERO_BONUS={
  jin1:'🔥 Jinchuriki<br>❤️ +20 HP máx',
- uchi1:'🌙 Uchiha<br>⚔️ +2 ATQ · 🎯 +3% CRIT',
+ uchi1:'🌙 Uchiha<br>⚔️ +2 ATQ · 🔴 5 jutsus exclusivos',
  tai5:'👊 Taijutsu<br>💨 +0.30 VEL',
 };
 function applyHeroBonus(id){
