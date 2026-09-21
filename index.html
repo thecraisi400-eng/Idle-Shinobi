@@ -213,6 +213,12 @@ button{font-family:inherit}
 .clsCard b{display:block; font-size:13.5px; color:#4a3518}
 .clsCard .al{display:block; font-size:10px; color:#8a5a33; font-weight:700}
 .clsCard .bo{display:block; font-size:9.5px; color:#2c5a86; font-weight:700; margin-top:3px; line-height:1.3}
+/* ---------- Invocación Uchiha ---------- */
+#ovSummon .panel{width:min(94vw,500px)}
+.summonChoices{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.summonChoice{min-height:132px;padding:9px 5px;border:2px solid rgba(107,67,38,.35);border-radius:12px;background:rgba(255,252,240,.8);color:#3a2a18;font-weight:800}
+.summonChoice .icon{display:block;font-size:36px;margin-bottom:5px}.summonChoice small{display:block;font-size:9px;line-height:1.2;color:#6a5232;font-weight:600;margin-top:4px}
+.summonChoice:active{transform:scale(.96);border-color:#e07b28}
 </style>
 </head>
 <body>
@@ -297,12 +303,27 @@ button{font-family:inherit}
   <div class="panel">
     <div class="pHead"><b>✨ Habilidades</b><button class="x" data-close="ovSk">✕</button></div>
     <div class="pBody">
-      <div style="font-size:11px;color:#6a5232;margin:0 0 8px;line-height:1.4">Toca un jutsu aprendido y elige en qué <b>ranura (1‑4)</b> equiparlo. Las ranuras son los <b>4 círculos</b> de la esquina inferior derecha: tócalos para lanzarlos. Cuestan 💧 MP, que se regenera solo con el tiempo.</div>
+      <div style="font-size:11px;color:#6a5232;margin:0 0 8px;line-height:1.4">Como Uchiha, equipa sus técnicas de clan. Toca un jutsu aprendido y elige en qué <b>ranura (1‑4)</b> equiparlo. Las ranuras son los <b>4 círculos</b> de la esquina inferior derecha: tócalos para lanzarlos. Cuestan 💧 MP, que se regenera solo con el tiempo.</div>
       <div id="skGrid" class="grid" style="grid-template-columns:repeat(4,1fr)"></div>
       <div style="font-size:11px;font-weight:800;color:#4a3518;margin:10px 0 6px">📖 Jutsus conocidos</div>
       <div id="skList" class="rowlist"></div>
     </div>
     <div class="pFoot"><span id="skMp">💧 0/0 MP</span><span style="font-size:10.5px;color:#6a5232">Sube de nivel para aprender más</span></div>
+  </div>
+</div>
+
+<!-- Elección de Kuchiyose no Jutsu -->
+<div id="ovSummon" class="ov">
+  <div class="panel">
+    <div class="pHead"><b>🌀 Kuchiyose no Jutsu</b><button class="x" data-close="ovSummon">✕</button></div>
+    <div class="pBody">
+      <div style="font-size:11px;color:#6a5232;margin:0 0 10px;line-height:1.35;text-align:center">Elige el pacto que aparecerá tras el sello y la nube de humo.</div>
+      <div class="summonChoices">
+        <button class="summonChoice" data-summon="crows"><span class="icon">🐦‍⬛</span>Cuervos<small>6 ataques en 5 s contra el objetivo.</small></button>
+        <button class="summonChoice" data-summon="hawk"><span class="icon">🦅</span>Halcón<small>Vuela y atraviesa obstáculos durante 12 s.</small></button>
+        <button class="summonChoice" data-summon="snake"><span class="icon">🐍</span>Serpiente<small>Busca y muerde al aldeano o muñeco cercano.</small></button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1221,6 +1242,7 @@ function drawPerson(c,o,time,isPlayer,heroOv){
   c.fillStyle='#222';
   const ex=fx*2.2, ey=fy*1.4;
   c.beginPath(); c.arc(-2.2+ex,-8+ey,1,0,7); c.arc(2.2+ex,-8+ey,1,0,7); c.fill();
+  if(isPlayer&&H.cls==='uchiha'&&UX&&UX.share){ c.fillStyle='#d92735'; c.beginPath(); c.arc(-2.2+ex,-8+ey,1.45,0,7); c.arc(2.2+ex,-8+ey,1.45,0,7); c.fill(); c.fillStyle='#111'; c.beginPath(); c.arc(-2.2+ex,-8+ey,.45,0,7); c.arc(2.2+ex,-8+ey,.45,0,7); c.fill(); }
   if(isPlayer&&H.blush){ c.fillStyle='rgba(240,130,130,.5)';
     c.beginPath(); c.arc(-4+ex*.5,-5.4,1.3,0,7); c.arc(4+ex*.5,-5.4,1.3,0,7); c.fill(); }
   if(isPlayer&&H.mouth==='smile'){ c.strokeStyle='rgba(60,30,20,.85)'; c.lineWidth=.9;
@@ -1263,6 +1285,11 @@ function update(dt,time){
   p.mp=clamp(p.mp+1.15*dt,0,stats().maxMp);
   /* habilidades: enfriamientos + Kage Bunshin */
   for(const k in SKCD)if(SKCD[k]>0)SKCD[k]=Math.max(0,SKCD[k]-dt);
+  if(UX.share){ p.mp=Math.max(0,p.mp-dt); if(p.mp<=0){UX.share=0;dirtyStats();toast('🔴 Sharingan se apagó: chakra agotado');} }
+  if(UX.fire){ const f=UX.fire; f.t+=dt; f.x+=f.vx*dt; f.y+=f.vy*dt; if((f.target&&dist2(f.x,f.y,f.target.x,f.target.y)<24*24)||f.t>1.5){if(f.target)hitUchiha(f.target,Math.round(stats().atk*1.8),'🔥');UX.fire=null;} }
+  if(UX.gen>0)UX.gen=Math.max(0,UX.gen-dt);
+  if(UX.chidori>0){ const t=UX.chidoriTarget; UX.chidori-=dt; if(t){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy)||1; moveWithCollide(p,dx/d*Math.min(420*dt,d),dy/d*Math.min(420*dt,d),11); if(d<24||UX.chidori<=0){hitUchiha(t,Math.round(stats().atk*2.5),'⚡');UX.chidori=0;}} }
+  if(UX.summon){ const u=UX.summon; u.t+=dt; if(u.kind==='crows'&&u.t>=u.next){u.next+=.8; if(u.target)hitUchiha(u.target,Math.max(3,Math.round(stats().atk*.55)),'🐦‍⬛');} if(u.kind==='snake'){if(!u.target||u.target.stun>0)u.target=combatTarget(260);if(u.t>=u.next&&u.target){u.next=u.t+1.3;hitUchiha(u.target,Math.round(stats().atk*.8),'🐍');}} if(u.t>=u.d){if(u.kind==='hawk')burst(p.x,p.y,'#e8e2d0',18,70);UX.summon=null;} }
   if(G.bunshin>0){ G.bunshin-=dt; if(G.bunshin<=0){G.bunshin=0; trailClear();} }
   trailPush(p.x,p.y);   /* OPT: ring-buffer, ni un objeto nuevo por frame */
   tickSkillBar();
@@ -1276,7 +1303,7 @@ function update(dt,time){
   if(p.moving){
     /* 53.53 = 62.98 menos 15 % (paso más pausado) */
     const sp=53.53*stats().spd*(IN.joy?clamp(IN.joy.mag*1.25,.35,1):1);
-    moveWithCollide(p,vx/mv*sp*dt,vy/mv*sp*dt,11);
+    if(UX.summon&&UX.summon.kind==='hawk') { p.x=clamp(p.x+vx/mv*sp*dt,50,WORLD.W-50); p.y=clamp(p.y+vy/mv*sp*dt,50,WORLD.H-50); } else moveWithCollide(p,vx/mv*sp*dt,vy/mv*sp*dt,11);
     p.face=Math.PI/2; p.walk+=dt; /* el héroe siempre mira al frente */
   } else p.walk=0;
   /* cámara */
@@ -1285,6 +1312,7 @@ function update(dt,time){
   cam.x=lerp(cam.x,tx,1-Math.pow(.001,dt)); cam.y=lerp(cam.y,ty,1-Math.pow(.001,dt));
   /* NPCs */
   for(const n of NPCS){
+    if(n.stun>0){ n.stun=Math.max(0,n.stun-dt); n.walk=0; continue; }
     if(n.wander){
       n.wt-=dt;
       if(n.wt<=0){ n.wt=2+Math.random()*4; const a=Math.random()*6.28, r=Math.random()*n.wr;
@@ -1401,6 +1429,10 @@ function render(time){
       case T_CLONE:  ctx.globalAlpha=e.a; drawPerson(ctx,e.ref,time,true); ctx.globalAlpha=1; break;
     }
   }
+  /* efectos de jutsu Uchiha: pocos paths, sólo cuando están activos */
+  if(UX.fire){ const f=UX.fire, r=15+Math.sin(time*18)*2; const g=ctx.createRadialGradient(f.x-4,f.y-5,2,f.x,f.y,r); g.addColorStop(0,'#fff6b0');g.addColorStop(.35,'#ffb12e');g.addColorStop(1,'rgba(210,45,15,.15)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(f.x,f.y,r,0,7);ctx.fill(); }
+  if(UX.chidori>0){ const p=G.p; ctx.strokeStyle='#bdeaff';ctx.lineWidth=2; for(let i=0;i<7;i++){const a=time*15+i*.9;ctx.beginPath();ctx.moveTo(p.x+5,p.y-7);ctx.lineTo(p.x+Math.cos(a)*22,p.y-7+Math.sin(a)*18);ctx.lineTo(p.x+Math.cos(a+1)*31,p.y-7+Math.sin(a+1)*25);ctx.stroke();} }
+  if(UX.summon){ const u=UX.summon,p=G.p; if(u.kind==='crows'){ctx.fillStyle='#171b23';for(let i=0;i<6;i++){const a=time*5+i*1.04;const x=(u.target?u.target.x:p.x)+Math.cos(a)*28,y=(u.target?u.target.y:p.y-10)+Math.sin(a*1.7)*17;ctx.beginPath();ctx.moveTo(x-7,y);ctx.lineTo(x,y-4);ctx.lineTo(x+7,y);ctx.lineTo(x,y+3);ctx.fill();}} else if(u.kind==='hawk'){ctx.fillStyle='#80562f';ctx.beginPath();ctx.moveTo(p.x-38,p.y-22);ctx.lineTo(p.x,p.y-38);ctx.lineTo(p.x+42,p.y-20);ctx.lineTo(p.x+9,p.y-14);ctx.lineTo(p.x,p.y-4);ctx.lineTo(p.x-9,p.y-14);ctx.fill();} else {const t=u.target||p;ctx.strokeStyle='#507d35';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(p.x+16,p.y);ctx.quadraticCurveTo((p.x+t.x)/2,p.y-34,t.x,t.y-5);ctx.stroke();ctx.fillStyle='#9abb57';ctx.beginPath();ctx.arc(t.x,t.y-6,8,0,7);ctx.fill();} }
   /* partículas — OPT: sólo los slots activos del pool */
   for(let i=0;i<PARTS.length;i++){ const q=PARTS[i]; if(!q.active)continue;
     ctx.globalAlpha=1-q.t/q.l; ctx.fillStyle=q.col; ctx.fillRect(q.x-q.sz/2,q.y-q.sz/2,q.sz,q.sz); }
@@ -1418,6 +1450,7 @@ function render(time){
   ctx.restore();
   /* tinte de día/noche */
   if(TINT_STR){ ctx.fillStyle=TINT_STR; ctx.fillRect(0,0,VW,VH); }   /* OPT: string precalculado */
+  if(UX.share||UX.gen>0){ ctx.fillStyle=UX.gen>0?'rgba(62,0,12,.20)':'rgba(15,0,4,.16)';ctx.fillRect(0,0,VW,VH); const pulse=1+Math.sin(time*5)*.04;ctx.save();ctx.translate(VW/2,VH*.27);ctx.scale(pulse,pulse); for(const side of [-1,1]){ctx.save();ctx.translate(side*72,0);ctx.fillStyle='#f5e7dc';ctx.beginPath();ctx.ellipse(0,0,46,25,0,0,7);ctx.fill();ctx.fillStyle='#c51f32';ctx.beginPath();ctx.arc(0,0,18,0,7);ctx.fill();ctx.fillStyle='#171018';ctx.beginPath();ctx.arc(0,0,6,0,7);ctx.fill();for(let i=0;i<3;i++){const a=time*(UX.gen>0?5:.8)+i*2.1;ctx.beginPath();ctx.arc(Math.cos(a)*11,Math.sin(a)*11,3,0,7);ctx.fill();}ctx.restore();}ctx.restore(); }
   /* joystick dinámico */
   if(IN.joy){
     const j=IN.joy;
@@ -1463,6 +1496,7 @@ function stats(){
   maxMp+=Math.round(mag*4);
   if(G.buffs.atk>0)atk=Math.round(atk*1.1);
   if(G.buffs.spd>0)spd=Math.round(spd*110)/100;    /* OPT: sin toFixed (creaba un string) */
+  if(UX&&UX.share){ spd=Math.round(spd*115)/100; crit+=12; }
   ST.atk=Math.round(atk); ST.def=Math.round(def); ST.spd=spd; ST.crit=crit; ST.mag=mag; ST.maxMp=Math.round(maxMp);
   return ST;
 }
@@ -1813,8 +1847,13 @@ const SKILLS={
   katon:{n:'Katon: Bola Ígnea',e:'🔥',lv:5,mp:18,cd:14,d:'Onda de fuego que recolecta de golpe todos los árboles, rocas y arbustos cercanos.'},
   bunshin:{n:'Kage Bunshin',e:'👥',lv:7,mp:22,cd:50,d:'Invoca 2 clones de sombra durante 60 s. Mientras duren, ganas +15 % EXP.'},
   chidori:{n:'Chidori',e:'⚡',lv:9,mp:20,cd:12,d:'Mil rayos: entrenamiento relámpago sobre el muñeco cercano, con recompensa extra.'},
+  uchiha_katon:{n:'Katon: Gōkakyū no Jutsu',e:'🔥',lv:1,mp:14,cd:9,cls:'uchiha',d:'Expulsa una gran bola de fuego concentrada que cruza el campo y golpea al objetivo.'},
+  genjutsu:{n:'Genjutsu Rápido',e:'👁️',lv:1,mp:12,cd:18,cls:'uchiha',d:'Contacto visual Sharingan: paraliza al objetivo durante 10 segundos.'},
+  sharingan:{n:'Sharingan',e:'🔴',lv:1,mp:0,cd:1,cls:'uchiha',d:'Activa ojos rojos, +15% velocidad, +15% evasión y +12% doble golpe. Consume 1 MP/s.'},
+  uchiha_chidori:{n:'Chidori',e:'⚡',lv:1,mp:18,cd:11,cls:'uchiha',d:'Chakra de rayo en la mano: embestida perforante contra el objetivo.'},
+  kuchiyose:{n:'Kuchiyose no Jutsu',e:'🌀',lv:1,mp:20,cd:30,cls:'uchiha',d:'Elige cuervos, halcón o serpiente tras completar el sello de invocación.'},
 };
-const SKILLS_ORDER=['rasengan','shunshin','palma','katon','bunshin','chidori'];
+const SKILLS_ORDER=['rasengan','shunshin','palma','katon','bunshin','chidori','uchiha_katon','genjutsu','sharingan','uchiha_chidori','kuchiyose'];
 const SKCD={};            // id -> segundos de enfriamiento restantes (no se guarda)
 /* OPT: estela del jugador en ring-buffer PREASIGNADO. Antes era
    TRAIL.push({x,y}) + TRAIL.shift() CADA fotograma: un objeto nuevo y un
@@ -1825,8 +1864,33 @@ let trHead=0, trLen=0;
 function trailPush(x,y){ const q=TRAIL[trHead]; q.x=x; q.y=y; trHead=(trHead+1)%TRAIL.length; if(trLen<TRAIL.length)trLen++; }
 function trailAt(k){ return TRAIL[(trHead-1-k+TRAIL.length*2)%TRAIL.length]; }  /* k=0 => el más nuevo */
 function trailClear(){ trHead=0; trLen=0; }
-function skillUnlocked(id){ return G.p.lvl>=(SKILLS[id]?SKILLS[id].lv:99); }
+function skillUnlocked(id){ const sk=SKILLS[id]; return !!sk&&G.p.lvl>=sk.lv&&(!sk.cls||heroOf().cls===sk.cls); }
+function availableSkills(){ const cls=heroOf().cls; return SKILLS_ORDER.filter(id=>cls==='uchiha'?SKILLS[id].cls==='uchiha':!SKILLS[id].cls); }
 
+/* --- efectos Uchiha: estado compacto, sin crear partículas persistentes --- */
+const UX={fire:null,gen:0,genTarget:null,share:0,chidori:0,chidoriTarget:null,summon:null,pending:false};
+function combatTarget(range){
+  const p=G.p; let best=null, bd=range*range;
+  for(const d of DUMMIES){const dd=dist2(p.x,p.y,d.x,d.y);if(dd<bd){bd=dd;best=d;}}
+  for(const n of NPCS){const dd=dist2(p.x,p.y,n.x,n.y);if(dd<bd){bd=dd;best=n;}}
+  return best;
+}
+function hitUchiha(t,amount,label){
+  if(!t)return;
+  t.hit=NOW(); t.hp=(t.hp===undefined?100:t.hp)-amount;
+  if(t.wander)t.stun=Math.max(t.stun||0,.35);
+  burst(t.x,t.y-12,'#ffcc77',10,85); floatTxt(t.x,t.y-38,'-'+amount+' '+label,'#ff9d8a');
+  if(tummy(t)){ const g=8+G.p.lvl*2; G.p.gold+=g; addExp(9); qEvent('train',1); }
+}
+function tummy(t){ return DUMMIES.indexOf(t)>=0; }
+function openSummon(){ UX.pending=true; openOv('ovSummon'); }
+function summon(kind){
+  if(!UX.pending)return; UX.pending=false; closeAll();
+  G.p.mp-=SKILLS.kuchiyose.mp; SKCD.kuchiyose=SKILLS.kuchiyose.cd;
+  UX.summon={kind,t:0,d:kind==='hawk'?12:kind==='crows'?5:10,next:0,target:combatTarget(270)};
+  burst(G.p.x,G.p.y,'#e8e2d0',28,95); sfx('ok'); vib(35);
+  floatTxt(G.p.x,G.p.y-38,'🌀 ¡Kuchiyose: '+(kind==='crows'?'Cuervos':kind==='hawk'?'Halcón':'Serpiente')+'!','#e8e2d0'); refreshHUD();
+}
 /* --- efecto de cada jutsu (devolver false = no se lanza: sin coste ni enfriamiento) --- */
 const SKFX={
   rasengan(){ const p=G.p;
@@ -1883,7 +1947,11 @@ const SKFX={
     const g=22+G.p.lvl*4; G.p.gold+=g;
     floatTxt(best.x,best.y-46,'⚡ -'+(stats().atk*2)+' ⚔️','#9ad1ff'); floatTxt(best.x,best.y-60,'+'+g+' 🪙','#ffe08a');
     addExp(20+G.p.lvl*3); qEvent('train',1);
-  },
+  },  uchiha_katon(){ const p=G.p, t=combatTarget(320); const a=t?Math.atan2(t.y-p.y,t.x-p.x):p.face||0; UX.fire={x:p.x,y:p.y-8,vx:Math.cos(a)*235,vy:Math.sin(a)*235,t:0,target:t}; burst(p.x,p.y-10,'#ff8d32',14,90); sfx('stone'); vib(30); },
+  genjutsu(){ const t=combatTarget(230); if(!t){toast('👁️ Necesitas contacto visual con un objetivo cercano');return false;} UX.gen=1.35; UX.genTarget=t; t.stun=10; burst(t.x,t.y-12,'#d94355',12,55); sfx('ok'); vib(25); floatTxt(t.x,t.y-40,'PARALIZADO · 10 s','#f08a9a'); },
+  sharingan(){ UX.share=UX.share?0:1; dirtyStats(); toast(UX.share?'🔴 Sharingan activo · 1 MP/s':'⚫ Sharingan desactivado'); sfx('ok'); return false; },
+  uchiha_chidori(){ const t=combatTarget(220); if(!t){toast('⚡ Acércate a un objetivo para embestir');return false;} UX.chidori=.42; UX.chidoriTarget=t; sfx('ok'); vib(45); },
+  kuchiyose(){ openSummon(); return false; },
 };
 
 /* --- lanzar el jutsu de una ranura (0‑3) --- */
@@ -1917,7 +1985,7 @@ function unequipSkill(slot){
 }
 function autoEquipSkills(){
   const s=G.skills.slots;
-  for(const id of SKILLS_ORDER){ if(s.indexOf(id)>=0||!skillUnlocked(id))continue;
+  for(const id of availableSkills()){ if(s.indexOf(id)>=0||!skillUnlocked(id))continue;
     const free=s.indexOf(null); if(free<0)break; s[free]=id; }
 }
 
@@ -1934,7 +2002,7 @@ function renderSk(){
     grid.appendChild(c);
   }
   const list=$('skList'); list.innerHTML='';
-  for(const id of SKILLS_ORDER){
+  for(const id of availableSkills()){
     const sk=SKILLS[id], ok=skillUnlocked(id), sl=G.skills.slots.indexOf(id);
     const row=document.createElement('div'); row.className='srow';
     if(!ok)row.style.cssText='filter:grayscale(.85);opacity:.65';
@@ -2188,6 +2256,7 @@ function openClassChooser(){
   paint();
 }
 $('classX').onclick=()=>{ closeAll(); sfx('click'); };
+document.querySelectorAll('[data-summon]').forEach(b=>b.onclick=()=>summon(b.dataset.summon));
 $('mNew').onclick=()=>{ audio(); sfx('click');
   if(hasSave()&&!confirm('¿Empezar de cero? Se conservará tu partida guardada hasta que sobrescribas al guardar.'))return;
   openClassChooser(); };
